@@ -1,0 +1,102 @@
+{
+  "finalSummoning": {
+    "id": "finalSummoning",
+    "name": "A Mão Sob o Assoalho",
+    "description": "Um rito que se constrói em camadas. Enquanto ativo, estabiliza o ciclo. Cada falha alimenta o que está abaixo.",
+    "failureLimit": 3,
+    "stages": [
+      {
+        "id": "circle",
+        "name": "Traçar o Círculo",
+        "requiredProgress": 2,
+        "advanceCost": { "Money": 1, "humanPower": 1 },
+        "failurePenalty": { "Suspicion": 1 }
+      },
+      {
+        "id": "firstWord",
+        "name": "A Primeira Palavra",
+        "requiredProgress": 1,
+        "advanceCost": { "Food": 2 },
+        "failurePenalty": { "Suspicion": 1 }
+      },
+      {
+        "id": "bloodSpeaks",
+        "name": "Sangue Fala",
+        "requiredProgress": 2,
+        "advanceCost": { "Money": 1, "humanPower": 1 },
+        "failurePenalty": { "Suspicion": 1, "Money": -1 }
+      },
+      {
+        "id": "vigil",
+        "name": "A Vigília",
+        "requiredProgress": 1,
+        "advanceCost": { "Food": 1, "humanPower": 1 },
+        "failurePenalty": { "Suspicion": 2 }
+      },
+      {
+        "id": "offering",
+        "name": "A Oferenda",
+        "requiredProgress": 2,
+        "advanceCost": { "Money": 2, "humanPower": 2 },
+        "failurePenalty": { "Suspicion": 2, "Cultists": -1 }
+      },
+      {
+        "id": "openHand",
+        "name": "A Mão Aberta",
+        "requiredProgress": 1,
+        "advanceCost": { "Relics": 1 },
+        "failurePenalty": { "Suspicion": 3, "Cultists": -2 }
+      }
+    ]
+  },
+  "twilightPact": {
+    "id": "twilightPact",
+    "name": "O Pacto do Limiar",
+    "description": "Um rito volátil, de ritmo imprevisível. Exige pouco de cada vez, mas hesitação cobra o dobro.",
+    "failureLimit": 2,
+    "stages": [
+      {
+        "id": "firstSign",
+        "name": "Primeiro Sinal",
+        "requiredProgress": 3,
+        "advanceCost": { "Food": 1 },
+        "failurePenalty": { "Suspicion": 1 }
+      },
+      {
+        "id": "nightCode",
+        "name": "Código da Noite",
+        "requiredProgress": 1,
+        "advanceCost": { "Money": 1, "humanPower": 1 },
+        "failurePenalty": { "Food": -1 }
+      },
+      {
+        "id": "witness",
+        "name": "Testemunha",
+        "requiredProgress": 3,
+        "advanceCost": { "humanPower": 1 },
+        "failurePenalty": { "Suspicion": 2 }
+      },
+      {
+        "id": "silence",
+        "name": "Momento de Silêncio",
+        "requiredProgress": 1,
+        "advanceCost": { "Money": 2 },
+        "failurePenalty": { "Suspicion": 1 }
+      },
+      {
+        "id": "keyAndLock",
+        "name": "Chave e Fechadura",
+        "requiredProgress": 3,
+        "advanceCost": { "Food": 1, "humanPower": 1 },
+        "failurePenalty": { "Suspicion": 2, "Money": -1 }
+      },
+      {
+        "id": "threshold",
+        "name": "O Limiar",
+        "requiredProgress": 1,
+        "advanceCost": { "Relics": 1 },
+        "failurePenalty": { "Suspicion": 3, "Cultists": -2 }
+      }
+    ]
+  }
+}

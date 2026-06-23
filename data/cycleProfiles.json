@@ -1,0 +1,41 @@
+{
+  "defaults": {
+    "persistentPerCycle": 9,
+    "discardableMin": 2,
+    "discardableMax": 3,
+    "ritualEvents": 2,
+    "escalationIntensity": 1,
+    "brutalizeLimit": 2,
+    "deferralsBeforeApocalypse": 3,
+    "minimumPressures": ["food", "suspicion", "money", "cult", "ritual", "escalation"]
+  },
+  "profiles": [
+    {
+      "minCycle": 1,
+      "name": "Whispers",
+      "persistentPerCycle": 7,
+      "discardableMin": 2,
+      "discardableMax": 3,
+      "ritualEvents": 1,
+      "escalationIntensity": 1
+    },
+    {
+      "minCycle": 3,
+      "name": "Pressure",
+      "persistentPerCycle": 9,
+      "discardableMin": 2,
+      "discardableMax": 3,
+      "ritualEvents": 2,
+      "escalationIntensity": 2
+    },
+    {
+      "minCycle": 5,
+      "name": "The Door Splinters",
+      "persistentPerCycle": 10,
+      "discardableMin": 2,
+      "discardableMax": 4,
+      "ritualEvents": 3,
+      "escalationIntensity": 3
+    }
+  ]
+}

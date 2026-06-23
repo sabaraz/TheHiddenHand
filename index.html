@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The Hidden Hand</title>
+    <link rel="stylesheet" href="styles/main.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <span class="app-header__title">The Hidden Hand</span>
+      <button class="app-header__menu-btn" id="menu-btn" aria-label="Abrir menu" aria-expanded="false">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
+        </svg>
+      </button>
+    </header>
+
+    <div class="menu-overlay" id="menu-overlay" aria-hidden="true">
+      <div class="menu-popup" role="dialog" aria-modal="true" aria-label="Menu da partida">
+        <div class="menu-popup__head">
+          <span class="menu-popup__name">Menu</span>
+          <button class="menu-popup__close" id="menu-close" aria-label="Fechar menu">&times;</button>
+        </div>
+        <div class="menu-popup__actions">
+          <button class="menu-action" id="menu-save">Salvar</button>
+          <button class="menu-action" id="menu-new-run">New run</button>
+          <button class="menu-action" id="menu-load">Load</button>
+          <button class="menu-action menu-action--panic" id="panic-reset">&#9888; P&#226;nico</button>
+        </div>
+        <p class="menu-status" id="menu-message" aria-live="polite"></p>
+        <div class="menu-log">
+          <p class="menu-log__label">Log</p>
+          <ol id="log" class="log-list"></ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="start-screen" id="start-screen" role="dialog" aria-modal="true" aria-label="Iniciar partida">
+      <div class="start-card-backdrop" aria-hidden="true"></div>
+      <div class="start-screen__inner">
+        <div class="start-actions">
+          <button class="start-btn start-btn--primary" id="start-new-run">New run</button>
+          <button class="start-btn start-btn--secondary" id="start-load">Load</button>
+        </div>
+        <p class="start-msg" id="start-message" aria-live="polite"></p>
+      </div>
+    </div>
+
+    <div class="game-screen" id="game-screen" hidden>
+      <div class="game-status-bar">
+        <div id="cycle-stats" class="cycle-stats compact-stats"></div>
+      </div>
+
+      <main class="game-table">
+        <div class="table-center">
+          <article id="event-card" class="event-card event-card--closed" aria-label="Carta de evento"></article>
+          <section class="ritual-inline" id="ritual-inline" aria-live="polite" hidden>
+            <div id="ritual"></div>
+          </section>
+          <section class="choice-panel" id="choices-section" aria-label="Op&#231;&#245;es" hidden>
+            <div id="choices" class="choice-list"></div>
+          </section>
+          <div class="pressure-area" id="pressure-bar-area" aria-label="Press&#227;o"></div>
+          <section class="hand-panel" aria-label="M&#227;o de recursos">
+            <div class="hand-header">
+              <div class="hand-header__spacer"></div>
+              <button class="panic-quick-btn" id="panic-quick" type="button" aria-label="Bot&#227;o do P&#226;nico" title="P&#226;nico">&#9888;&#65039;</button>
+              <span id="hand-count" class="hand-count"></span>
+            </div>
+            <div class="resource-hand-scroll">
+              <div id="resources" class="resource-hand"></div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <template id="choice-template">
+      <button class="choice-card" type="button">
+        <span class="choice-card__label"></span>
+        <div class="choice-card__consequences">
+          <div class="choice-card__gains"></div>
+          <div class="choice-card__sep"></div>
+          <div class="choice-card__costs"></div>
+        </div>
+      </button>
+    </template>
+
+    <script type="module" src="ui/app.js"></script>
+  </body>
+</html>

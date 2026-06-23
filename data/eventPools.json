@@ -1,0 +1,586 @@
+{
+  "mandatory": [
+    {
+      "id": "mandatory-starvation",
+      "title": "Empty Shelves",
+      "kind": "mandatory",
+      "cycleBehavior": "persistent",
+      "tags": ["food", "apocalyptic"],
+      "body": "The cabinets are bare. Those sharing the space look at one another with calculating eyes.",
+      "choices": [
+        {
+          "id": "emergency-cache",
+          "label": "Break open the emergency reserve",
+          "cost": { "Money": 1 },
+          "effects": [{ "type": "resource", "resource": "Food", "amount": 2 }],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "thin-the-flock",
+          "label": "Ensure survival at one person's expense",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Food", "amount": 3 },
+            { "type": "resource", "resource": "Suspicion", "amount": 1 }
+          ],
+          "destination": "remove",
+          "tone": "danger"
+        },
+        {
+          "id": "let-starve",
+          "label": "Let the shortage run its course",
+          "effects": [
+            { "type": "resource", "resource": "Cultists", "amount": -1 },
+            { "type": "resource", "resource": "Suspicion", "amount": 2 }
+          ],
+          "destination": "return",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "mandatory-police-raid",
+      "title": "Door Knock",
+      "kind": "mandatory",
+      "cycleBehavior": "persistent",
+      "tags": ["suspicion", "apocalyptic"],
+      "body": "Boots cross the threshold before anyone remembers to lock the door.",
+      "choices": [
+        {
+          "id": "bribe",
+          "label": "Handle it with money",
+          "cost": { "Money": 3 },
+          "allowRelicSubstitution": true,
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -3 }],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "frame-prisoner",
+          "label": "Hand them a convenient culprit",
+          "cost": { "Prisoners": 1 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -4 }],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "scatter",
+          "label": "Scatter into the alleys",
+          "effects": [
+            { "type": "resource", "resource": "Cultists", "amount": -1 },
+            { "type": "resource", "resource": "Suspicion", "amount": -2 }
+          ],
+          "destination": "brutalize",
+          "upgradeTo": "raid-brutal",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "mandatory-greed",
+      "title": "Too Much in One Place",
+      "kind": "mandatory",
+      "cycleBehavior": "persistent",
+      "tags": ["money", "cult", "escalation"],
+      "body": "Accumulation has its own gravity. People notice what they are not meant to see.",
+      "choices": [
+        {
+          "id": "distribute",
+          "label": "Spread it thin before envy organizes",
+          "cost": { "Money": 2, "Food": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Suspicion", "amount": -1 },
+            { "type": "flag", "flag": "greedPacified", "value": true }
+          ],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "hoard",
+          "label": "Let them imagine what they cannot have",
+          "effects": [
+            { "type": "resource", "resource": "Money", "amount": 1 },
+            { "type": "pressure", "amount": 2 }
+          ],
+          "destination": "return",
+          "tone": "danger"
+        },
+        {
+          "id": "relocate",
+          "label": "Move the excess somewhere less obvious",
+          "cost": { "Money": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Suspicion", "amount": -1 }
+          ],
+          "destination": "remove",
+          "tone": "info"
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "begging-bowl",
+      "title": "Day Work",
+      "kind": "common",
+      "cycleBehavior": "persistent",
+      "tags": ["money", "food"],
+      "body": "Keeping a low profile means blending in. There is always work for someone willing not to ask questions.",
+      "choices": [
+        {
+          "id": "stay-hidden",
+          "label": "Stay out of sight today",
+          "effects": [{ "type": "pressure", "amount": 1 }],
+          "destination": "defer",
+          "tone": "info"
+        },
+        {
+          "id": "send-two",
+          "label": "Send the most forgettable faces",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Money", "amount": 2 },
+            { "type": "resource", "resource": "Food", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "work-long",
+          "label": "Work the longer route, risk the extra hours",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Money", "amount": 3 },
+            { "type": "resource", "resource": "Food", "amount": 1 },
+            { "type": "resource", "resource": "Suspicion", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "market-whisper",
+      "title": "Gray Market",
+      "kind": "common",
+      "cycleBehavior": "discardable",
+      "tags": ["money", "suspicion"],
+      "body": "A contact with nervous hands offers goods from an estate that closed without a will.",
+      "choices": [
+        {
+          "id": "pass",
+          "label": "Pass on the opportunity this time",
+          "effects": [{ "type": "pressure", "amount": 1 }],
+          "destination": "defer",
+          "tone": "info"
+        },
+        {
+          "id": "buy",
+          "label": "Buy the lot without asking about origin",
+          "cost": { "Money": 2 },
+          "allowRelicSubstitution": true,
+          "effects": [{ "type": "resource", "resource": "Food", "amount": 4 }],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "pressure",
+          "label": "Apply quiet pressure after dark",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Food", "amount": 3 },
+            { "type": "resource", "resource": "Suspicion", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "street-sermon",
+      "title": "Coded Words",
+      "kind": "common",
+      "cycleBehavior": "persistent",
+      "tags": ["cult", "suspicion"],
+      "body": "The right sentence, spoken in the right place, lodges itself in a stranger's thoughts for days.",
+      "choices": [
+        {
+          "id": "say-nothing",
+          "label": "Say nothing today, watch instead",
+          "effects": [{ "type": "pressure", "amount": 1 }],
+          "destination": "defer",
+          "tone": "info"
+        },
+        {
+          "id": "preach",
+          "label": "Speak obliquely at the edge of a crowd",
+          "effects": [
+            { "type": "resource", "resource": "Cultists", "amount": 1 },
+            { "type": "resource", "resource": "Suspicion", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "info"
+        },
+        {
+          "id": "coded",
+          "label": "Leave coded notes with the right people",
+          "cost": { "Money": 1 },
+          "effects": [{ "type": "resource", "resource": "Cultists", "amount": 1 }],
+          "destination": "discard",
+          "tone": "success"
+        }
+      ]
+    },
+    {
+      "id": "cellar-door",
+      "title": "The Back Room",
+      "kind": "common",
+      "cycleBehavior": "persistent",
+      "tags": ["cult", "food"],
+      "body": "Someone below the floor promises anything to see daylight again.",
+      "choices": [
+        {
+          "id": "ignore",
+          "label": "Leave them — let the noise be their problem",
+          "effects": [
+            { "type": "resource", "resource": "Suspicion", "amount": 1 }
+          ],
+          "destination": "return",
+          "tone": "danger"
+        },
+        {
+          "id": "keep",
+          "label": "Feed and maintain the arrangement",
+          "cost": { "Food": 1 },
+          "effects": [{ "type": "resource", "resource": "Prisoners", "amount": 1 }],
+          "destination": "discard",
+          "tone": "info"
+        },
+        {
+          "id": "convert",
+          "label": "Let their desperation become allegiance",
+          "cost": { "Food": 1, "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Cultists", "amount": 1 },
+            { "type": "resource", "resource": "Suspicion", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "success"
+        }
+      ]
+    },
+    {
+      "id": "relic-in-the-wall",
+      "title": "Something Old",
+      "kind": "opportunity",
+      "cycleBehavior": "unique",
+      "tags": ["relic", "money"],
+      "body": "Behind old plaster, a hand of blackened silver waits with fingers curled inward.",
+      "choices": [
+        {
+          "id": "mark",
+          "label": "Mark the spot and come back later",
+          "effects": [
+            { "type": "pressure", "amount": 1 },
+            { "type": "deferEvent", "eventId": "relic-in-the-wall" }
+          ],
+          "destination": "defer",
+          "tone": "info"
+        },
+        {
+          "id": "claim",
+          "label": "Retrieve it carefully before dawn",
+          "cost": { "Money": 2 },
+          "effects": [
+            { "type": "resource", "resource": "Relics", "amount": 1 },
+            { "type": "opportunityUsed", "eventId": "relic-in-the-wall" }
+          ],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "grab-quick",
+          "label": "Take it now without preparation",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Relics", "amount": 1 },
+            { "type": "resource", "resource": "Suspicion", "amount": 1 },
+            { "type": "opportunityUsed", "eventId": "relic-in-the-wall" }
+          ],
+          "destination": "remove",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "ritual-dream",
+      "title": "The Pattern",
+      "kind": "ritual",
+      "cycleBehavior": "persistent",
+      "tags": ["ritual"],
+      "body": "The same geometry appears in sleep, in shadows, in cracks along the ceiling. It is asking to be completed.",
+      "choices": [
+        {
+          "id": "wait",
+          "label": "File it away as coincidence",
+          "effects": [{ "type": "pressure", "amount": 1 }],
+          "destination": "defer",
+          "tone": "info"
+        },
+        {
+          "id": "begin",
+          "label": "Begin following the pattern carefully",
+          "cost": { "Money": 1, "humanPower": 1 },
+          "effects": [
+            { "type": "startSelectedRitual" },
+            { "type": "stabilizeCycle", "amount": 1 }
+          ],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "rush",
+          "label": "Start immediately, without full preparation",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "startSelectedRitual" },
+            { "type": "pressure", "amount": 2 }
+          ],
+          "destination": "remove",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "ritual-work",
+      "title": "Night Work",
+      "kind": "ritual",
+      "cycleBehavior": "persistent",
+      "requiresActiveRitual": true,
+      "tags": ["ritual", "cult"],
+      "body": "The work continues after everyone else has gone to bed. Every step demands something real.",
+      "choices": [
+        {
+          "id": "advance",
+          "label": "Pay what the next step requires",
+          "usesRitualCost": true,
+          "effects": [{ "type": "advanceRitual" }],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "botch",
+          "label": "Push through using effort instead of care",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "advanceRitual", "unsafe": true },
+            { "type": "pressure", "amount": 2 }
+          ],
+          "destination": "brutalize",
+          "upgradeTo": "ritual-work-brutal",
+          "tone": "danger"
+        },
+        {
+          "id": "gamble",
+          "label": "Trust chance to carry this step",
+          "effects": [{ "type": "advanceRitualChance", "successChance": 0.5 }],
+          "destination": "discard",
+          "tone": "info"
+        }
+      ]
+    },
+    {
+      "id": "ledger-smoke",
+      "title": "Paper Trail",
+      "kind": "common",
+      "cycleBehavior": "discardable",
+      "tags": ["money", "suspicion"],
+      "body": "The accounts have begun to read like a confession. Numbers that should not line up are lining up.",
+      "choices": [
+        {
+          "id": "burn",
+          "label": "Destroy everything and work from memory",
+          "effects": [
+            { "type": "resource", "resource": "Money", "amount": -1 },
+            { "type": "pressure", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "danger"
+        },
+        {
+          "id": "cook",
+          "label": "Rewrite the records cleanly",
+          "cost": { "Money": 1 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -1 }],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "outsource",
+          "label": "Pay someone to make it disappear entirely",
+          "cost": { "Money": 2, "humanPower": 1 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -2 }],
+          "destination": "remove",
+          "tone": "success"
+        }
+      ]
+    },
+    {
+      "id": "well-rumor",
+      "title": "Long Tongue",
+      "kind": "common",
+      "cycleBehavior": "scalable",
+      "tags": ["suspicion", "escalation"],
+      "body": "A neighbor has been saying things. Not accusations yet — just observations with a particular shape.",
+      "choices": [
+        {
+          "id": "let-spread",
+          "label": "Let it pass without reaction",
+          "effects": [
+            { "type": "resource", "resource": "Suspicion", "amount": 2 },
+            { "type": "pressure", "amount": 1 }
+          ],
+          "destination": "upgrade",
+          "upgradeTo": "well-rumor-brutal",
+          "tone": "danger"
+        },
+        {
+          "id": "silence",
+          "label": "Deal with the source directly",
+          "cost": { "Money": 1, "humanPower": 1 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -2 }],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "redirect",
+          "label": "Introduce a more interesting story nearby",
+          "effects": [
+            { "type": "resource", "resource": "Suspicion", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "info"
+        }
+      ]
+    },
+    {
+      "id": "raid-brutal",
+      "title": "Second Visit",
+      "kind": "apocalyptic",
+      "cycleBehavior": "apocalyptic",
+      "tags": ["suspicion", "apocalyptic"],
+      "body": "They come with names this time. One of the names sounds like something they read off a wall.",
+      "choices": [
+        {
+          "id": "vanish",
+          "label": "Use the object to vanish completely",
+          "cost": { "Relics": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Suspicion", "amount": -5 },
+            { "type": "resource", "resource": "Cultists", "amount": -1 }
+          ],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "caught",
+          "label": "Let the most exposed ones confess",
+          "cost": { "humanPower": 2 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -3 }],
+          "destination": "remove",
+          "tone": "danger"
+        },
+        {
+          "id": "abandon",
+          "label": "Abandon the location entirely",
+          "effects": [
+            { "type": "resource", "resource": "Cultists", "amount": -2 },
+            { "type": "resource", "resource": "Suspicion", "amount": -2 }
+          ],
+          "destination": "remove",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "well-rumor-brutal",
+      "title": "Documented",
+      "kind": "apocalyptic",
+      "cycleBehavior": "apocalyptic",
+      "tags": ["suspicion", "escalation", "apocalyptic"],
+      "body": "It has moved from spoken to written. Someone filed it somewhere official.",
+      "choices": [
+        {
+          "id": "seal",
+          "label": "Intervene at the source with money and an object",
+          "cost": { "Money": 2, "Relics": 1 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -3 }],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "embrace",
+          "label": "Lean into the attention as cover",
+          "effects": [
+            { "type": "resource", "resource": "Cultists", "amount": 2 },
+            { "type": "resource", "resource": "Suspicion", "amount": 2 }
+          ],
+          "destination": "return",
+          "tone": "danger"
+        },
+        {
+          "id": "pay-to-forget",
+          "label": "Pay everyone involved to misplace the file",
+          "cost": { "Money": 3 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -4 }],
+          "destination": "remove",
+          "tone": "success"
+        }
+      ]
+    },
+    {
+      "id": "ritual-work-brutal",
+      "title": "Wrong Shape",
+      "kind": "apocalyptic",
+      "cycleBehavior": "apocalyptic",
+      "requiresActiveRitual": true,
+      "tags": ["ritual", "escalation", "apocalyptic"],
+      "body": "The work has bent in a direction it should not go. What responds is not what was called.",
+      "choices": [
+        {
+          "id": "repair",
+          "label": "Correct the shape and restart the step",
+          "cost": { "Money": 2, "humanPower": 1 },
+          "effects": [
+            { "type": "ritualStabilize" },
+            { "type": "stabilizeCycle", "amount": 2 }
+          ],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "force",
+          "label": "Push through it with the object",
+          "cost": { "Relics": 1 },
+          "effects": [
+            { "type": "advanceRitual", "unsafe": true },
+            { "type": "resource", "resource": "Suspicion", "amount": 2 }
+          ],
+          "destination": "return",
+          "tone": "danger"
+        },
+        {
+          "id": "abandon-step",
+          "label": "Accept this step as lost and recalibrate",
+          "effects": [
+            { "type": "ritualFailure" },
+            { "type": "pressure", "amount": 2 }
+          ],
+          "destination": "discard",
+          "tone": "danger"
+        }
+      ]
+    }
+  ]
+}
