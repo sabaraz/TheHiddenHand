@@ -1,0 +1,43 @@
+/* ============================================================
+   THE HIDDEN HAND — TYPOGRAPHY TOKENS
+   One family (Inter) carries everything; weight + tracking do
+   the work. Heavy display weights for event titles, tight
+   uppercase tracking for institutional labels.
+   ============================================================ */
+
+:root {
+  /* ── Family ─────────────────────────────────────────────── */
+  --hh-font-sans: "Inter", ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --hh-font-display: var(--hh-font-sans); /* same family, heavier weight */
+  --hh-font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo,
+    Consolas, monospace; /* tabular stats / logs */
+
+  /* ── Weights ────────────────────────────────────────────── */
+  --hh-weight-regular: 400;
+  --hh-weight-medium: 500;
+  --hh-weight-semibold: 600;
+  --hh-weight-bold: 720;     /* labels, choice titles */
+  --hh-weight-display: 820;  /* event titles */
+
+  /* ── Sizes (fluid where the game uses clamp) ────────────── */
+  --hh-text-2xs: 0.70rem;    /* hints, consequence chips */
+  --hh-text-xs: 0.76rem;     /* kicker / event-type label */
+  --hh-text-sm: 0.84rem;     /* meta, log, stats */
+  --hh-text-base: 0.95rem;   /* body */
+  --hh-text-md: 1.05rem;     /* event summary */
+  --hh-text-lg: 1.34rem;     /* choice card label */
+  --hh-text-xl: 1.82rem;     /* open event title */
+  --hh-display-sm: 2rem;
+  --hh-display: clamp(2rem, 5vw, 3.25rem); /* @kind font */
+
+  /* ── Line heights ───────────────────────────────────────── */
+  --hh-leading-tight: 0.98;  /* display */
+  --hh-leading-snug: 1.22;   /* choice labels */
+  --hh-leading-body: 1.48;   /* event body / copy */
+
+  /* ── Letter spacing ─────────────────────────────────────── */
+  --hh-tracking-display: 0;
+  --hh-tracking-label: 0.06em;   /* uppercase kickers */
+  --hh-tracking-wide: 0.10em;    /* app title, section labels */
+}

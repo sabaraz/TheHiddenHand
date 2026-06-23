@@ -1,0 +1,75 @@
+/* ============================================================
+   THE HIDDEN HAND — COLOR TOKENS
+   A warm near-black "basement" palette: parchment text, gold
+   candlelight, blood red threat, and per-resource sigil colors.
+   ============================================================ */
+
+:root {
+  color-scheme: dark;
+
+  /* ── Base neutrals (warm black → parchment) ─────────────── */
+  --hh-black: #000000;
+  --hh-bg: #11100e;          /* page base — warm near-black */
+  --hh-bg-deep: #0a0908;     /* header / popups — deepest */
+  --hh-surface: #1d1b18;     /* primary raised surface */
+  --hh-surface-2: #28231d;   /* secondary / inset surface */
+  --hh-line: #4a4035;        /* hairline borders */
+  --hh-line-soft: #2a2218;   /* faint dividers */
+
+  /* ── Text (parchment) ───────────────────────────────────── */
+  --hh-text: #eee7dc;        /* primary parchment */
+  --hh-muted: #b6aa9b;       /* secondary / labels */
+  --hh-faint: #7b7166;       /* disabled / tertiary */
+
+  /* ── Brand accents ──────────────────────────────────────── */
+  --hh-gold: #d2aa5c;        /* gilt edges, progress */
+  --hh-cream: #f6da9d;       /* candlelight — headings, primary accent */
+  --hh-red: #c0301e;         /* blood — danger, primary action, threat */
+  --hh-red-bright: #d63420;  /* hover state of red */
+  --hh-blood: #b85b55;       /* muted danger text */
+  --hh-green: #71986b;       /* gain / success (sage) */
+  --hh-blue: #668aab;        /* info (cold slate) */
+  --hh-violet: #c4aeff;      /* ritual / arcane text */
+
+  /* ── Resource sigil colors (card bands) ─────────────────── */
+  --hh-money: #b8860b;       /* dark gold */
+  --hh-food: #3e7a38;        /* deep green */
+  --hh-cultists: #5e2d9e;    /* violet */
+  --hh-prisoners: #1f4270;   /* iron blue */
+  --hh-relics: #6a5640;      /* tarnished bronze */
+  --hh-suspicion: #c0301e;   /* alarm red */
+
+  /* ── Shadows / glows (raw) ──────────────────────────────── */
+  --hh-shadow-color: rgba(0, 0, 0, 0.32);
+  --hh-glow-red: rgba(192, 48, 30, 0.48);
+  --hh-glow-alarm: rgba(255, 59, 87, 0.34);
+
+  /* ============================================================
+     SEMANTIC ALIASES — reference these in product code
+     ============================================================ */
+
+  /* Surfaces & text */
+  --hh-page-bg: var(--hh-bg);
+  --hh-surface-card: var(--hh-surface-2);
+  --hh-surface-overlay: var(--hh-bg-deep);
+  --hh-text-body: var(--hh-text);
+  --hh-text-label: var(--hh-muted);
+  --hh-text-disabled: var(--hh-faint);
+  --hh-text-heading: var(--hh-cream);
+
+  /* Borders */
+  --hh-border: var(--hh-line);
+  --hh-border-gilt: rgba(246, 218, 157, 0.20);   /* gold-tinted card edge */
+  --hh-border-gilt-strong: rgba(246, 218, 157, 0.34);
+  --hh-border-threat: rgba(192, 48, 30, 0.54);
+
+  /* Action / intent */
+  --hh-action-bg: var(--hh-red);
+  --hh-action-bg-hover: var(--hh-red-bright);
+  --hh-action-fg: #ffffff;
+  --hh-accent: var(--hh-cream);
+  --hh-danger: var(--hh-blood);
+  --hh-success: var(--hh-green);
+  --hh-info: var(--hh-blue);
+  --hh-ritual: var(--hh-violet);
+}

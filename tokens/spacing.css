@@ -1,0 +1,39 @@
+/* ============================================================
+   THE HIDDEN HAND — SPACING, RADII, SIZING TOKENS
+   Tight, table-game spacing. Cards keep tarot proportions.
+   ============================================================ */
+
+:root {
+  /* ── Spacing scale ──────────────────────────────────────── */
+  --hh-space-1: 4px;
+  --hh-space-2: 6px;
+  --hh-space-3: 8px;
+  --hh-space-4: 12px;
+  --hh-space-5: 14px;
+  --hh-space-6: 16px;
+  --hh-space-7: 20px;
+  --hh-space-8: 28px;
+  --hh-space-9: 40px;
+  --hh-space-10: 56px;
+
+  /* ── Radii ──────────────────────────────────────────────── */
+  --hh-radius-xs: 2px;       /* chips, pressure fragments */
+  --hh-radius-sm: 3px;       /* consequence chips */
+  --hh-radius-md: 6px;       /* buttons, choice cards */
+  --hh-radius-lg: 8px;       /* surfaces, event cards */
+  --hh-radius-pill: 999px;   /* stat pills, tags, meters */
+
+  /* ── Borders ────────────────────────────────────────────── */
+  --hh-border-width: 1px;
+
+  /* ── Fixed sizing ───────────────────────────────────────── */
+  --hh-header-h: 48px;
+  --hh-card-aspect: 1 / 1.414;     /* @kind other */
+  --hh-resource-card-w: 80px;
+  --hh-resource-card-h: 112px;
+  --hh-table-max: 1100px;          /* open-event grid width */
+  --hh-column-max: 760px;          /* single column width */
+
+  /* ── Touch targets ──────────────────────────────────────── */
+  --hh-hit-min: 44px;
+}

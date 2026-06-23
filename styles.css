@@ -1,0 +1,12 @@
+/* ============================================================
+   THE HIDDEN HAND — DESIGN SYSTEM ENTRY POINT
+   Consumers link THIS file. It is import-only; every token and
+   @font-face the system ships is reached from here.
+   ============================================================ */
+
+@import "tokens/fonts.css";
+@import "tokens/colors.css";
+@import "tokens/typography.css";
+@import "tokens/spacing.css";
+@import "tokens/effects.css";
+@import "tokens/base.css";

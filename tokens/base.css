@@ -1,0 +1,55 @@
+/* ============================================================
+   THE HIDDEN HAND — BASE LAYER
+   Minimal element defaults that establish the brand baseline.
+   Kept light so it never fights product code.
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--hh-backdrop);
+  background-attachment: fixed;
+  color: var(--hh-text-body);
+  font-family: var(--hh-font-sans);
+  font-size: var(--hh-text-base);
+  line-height: var(--hh-leading-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Section labels: small, uppercase, tracked, muted. */
+.hh-label {
+  font-size: var(--hh-text-xs);
+  font-weight: var(--hh-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--hh-tracking-wide);
+  color: var(--hh-text-label);
+}
+
+/* Display heading: candlelight cream, heavy, tight. */
+.hh-display {
+  font-family: var(--hh-font-display);
+  font-weight: var(--hh-weight-display);
+  font-size: var(--hh-display);
+  line-height: var(--hh-leading-tight);
+  color: var(--hh-text-heading);
+  margin: 0;
+}
+
+/* Tabular figures for stats / logs. */
+.hh-mono {
+  font-family: var(--hh-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tone helpers. */
+.hh-tone-danger  { color: var(--hh-danger); }
+.hh-tone-success { color: var(--hh-success); }
+.hh-tone-info    { color: var(--hh-info); }
+.hh-tone-ritual  { color: var(--hh-ritual); }

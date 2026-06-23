@@ -1,0 +1,26 @@
+<!-- @dsCard group="Colors" viewport="700x150" name="Resource Sigils" subtitle="Fixed band color per resource type" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 18px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .sw { width: 96px; }
+  .chip { height: 56px; border-radius: var(--hh-radius-md); border: 1px solid rgba(255,255,255,0.14); display:grid; place-items:center; color:rgba(255,255,255,0.92); font-weight:800; font-size:13px; }
+  .name { margin-top: 6px; font-size: 11px; color: var(--hh-muted); font-family: var(--hh-font-mono); }
+  .val { font-size: 10px; color: var(--hh-faint); font-family: var(--hh-font-mono); }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div class="sw"><div class="chip" style="background:var(--hh-money)">M</div><div class="name">money</div><div class="val">#b8860b</div></div>
+    <div class="sw"><div class="chip" style="background:var(--hh-food)">F</div><div class="name">food</div><div class="val">#3e7a38</div></div>
+    <div class="sw"><div class="chip" style="background:var(--hh-cultists)">C</div><div class="name">cultists</div><div class="val">#5e2d9e</div></div>
+    <div class="sw"><div class="chip" style="background:var(--hh-prisoners)">P</div><div class="name">prisoners</div><div class="val">#1f4270</div></div>
+    <div class="sw"><div class="chip" style="background:var(--hh-relics)">R</div><div class="name">relics</div><div class="val">#6a5640</div></div>
+    <div class="sw"><div class="chip" style="background:var(--hh-suspicion)">!</div><div class="name">suspicion</div><div class="val">#c0301e</div></div>
+  </div>
+</body>
+</html>

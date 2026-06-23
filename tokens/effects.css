@@ -1,0 +1,66 @@
+/* ============================================================
+   THE HIDDEN HAND — EFFECTS: SHADOWS, GLOWS, BACKDROPS, MOTION
+   Deep table-shadows, candlelit radial backdrop, an alarm pulse
+   reserved for Suspicion. Motion is minimal — fades, never bounce.
+   ============================================================ */
+
+:root {
+  /* ── Elevation shadows ──────────────────────────────────── */
+  --hh-shadow-sm: 0 10px 22px rgba(0, 0, 0, 0.22);   /* resource cards */
+  --hh-shadow-md: 0 12px 28px rgba(0, 0, 0, 0.32);   /* panels */
+  --hh-shadow-lg: 0 18px 40px rgba(0, 0, 0, 0.32);   /* event cards */
+  --hh-shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.42);   /* floating cards */
+  --hh-shadow-header: 0 2px 16px rgba(0, 0, 0, 0.56);
+  --hh-shadow-popup: -4px 0 24px rgba(0, 0, 0, 0.48);
+
+  /* ── Glows (threat / alarm) ─────────────────────────────── */
+  --hh-glow-pressure: 0 0 8px rgba(192, 48, 30, 0.48);
+  --hh-glow-alarm-ring: 0 0 0 1px rgba(255, 59, 87, 0.28),
+    0 0 18px rgba(255, 59, 87, 0.22);
+
+  /* ── Candlelit backdrop layers ──────────────────────────── */
+  /* The signature page background: warm vignette + a red ember
+     in the top-left, all over true black. */
+  --hh-backdrop:
+    linear-gradient(180deg, rgba(45, 37, 28, 0.42), rgba(17, 16, 14, 0.96)),
+    radial-gradient(circle at top left, rgba(192, 48, 30, 0.10), transparent 34rem),
+    var(--hh-black);
+
+  /* Centered candle glow for modal / start screens */
+  --hh-backdrop-altar:
+    radial-gradient(circle at 50% 32%, rgba(246, 218, 157, 0.08), transparent 24rem),
+    rgba(10, 9, 8, 0.82); /* @kind other */
+
+  /* Gilt sheen for card faces */
+  --hh-sheen-gilt:
+    linear-gradient(180deg, rgba(246, 218, 157, 0.035), rgba(0, 0, 0, 0)); /* @kind other */
+
+  /* ── Motion ─────────────────────────────────────────────── */
+  --hh-ease: cubic-bezier(0.4, 0, 0.2, 1); /* @kind other */
+  --hh-duration-fast: 0.14s; /* @kind other */
+  --hh-duration-pulse: 2.7s; /* @kind other */
+}
+
+/* ── Shared keyframes ─────────────────────────────────────── */
+
+/* Alarm pulse — reserved for the Suspicion resource only. */
+@keyframes hh-suspicion-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 1px rgba(255, 59, 87, 0.22),
+      0 0 14px rgba(255, 59, 87, 0.16),
+      0 10px 22px rgba(0, 0, 0, 0.22);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(255, 59, 87, 0.44),
+      0 0 24px rgba(255, 59, 87, 0.34),
+      0 10px 22px rgba(0, 0, 0, 0.22);
+  }
+}
+
+/* Quiet fade-in for cards being drawn to the table. */
+@keyframes hh-draw-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}

@@ -1,0 +1,365 @@
+{
+  "plugins": [
+    "react",
+    "import"
+  ],
+  "rules": {
+    "react/forbid-elements": [
+      "warn",
+      {
+        "forbid": []
+      }
+    ],
+    "no-restricted-imports": [
+      "warn",
+      {
+        "patterns": [
+          {
+            "group": [
+              "components/core/**",
+              "components/game/**",
+              "ui_kits/the-hidden-hand/**"
+            ],
+            "message": "Import design-system components from 'index.js', not component internals."
+          }
+        ]
+      }
+    ],
+    "no-restricted-syntax": [
+      "warn",
+      {
+        "selector": "Literal[value=/#[0-9a-fA-F]{3,8}\\b/]",
+        "message": "Raw hex color — use a design-system color token via var()."
+      },
+      {
+        "selector": "Literal[value=/\\b\\d+px\\b/]",
+        "message": "Raw px value — use a design-system spacing token via var()."
+      },
+      {
+        "selector": "Literal[value=/font-family\\s*:\\s*(?!['\\\"]?(?:Inter|JetBrains Mono))/i]",
+        "message": "Font not provided by the design system. Available: Inter, JetBrains Mono."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Button'] > JSXAttribute > JSXIdentifier[name!=/^(?:variant|size|disabled|type|onClick|style|children|key|ref|className|style|children)$/]",
+        "message": "<Button> doesn't accept that prop. Declared props: variant, size, disabled, type, onClick, style, children."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Button'] > JSXAttribute[name.name='variant'] > Literal[value!=/^(?:primary|secondary|ghost|panic)$/]",
+        "message": "<Button> variant must be one of 'primary' | 'secondary' | 'ghost' | 'panic'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Button'] > JSXAttribute[name.name='size'] > Literal[value!=/^(?:sm|md|lg)$/]",
+        "message": "<Button> size must be one of 'sm' | 'md' | 'lg'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Button'] > JSXAttribute[name.name='type'] > Literal[value!=/^(?:button|submit|reset)$/]",
+        "message": "<Button> type must be one of 'button' | 'submit' | 'reset'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Consequence'] > JSXAttribute > JSXIdentifier[name!=/^(?:kind|text|key|ref|className|style|children)$/]",
+        "message": "<Consequence> doesn't accept that prop. Declared props: kind, text."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Consequence'] > JSXAttribute[name.name='kind'] > Literal[value!=/^(?:gain|cost|threat|ritual)$/]",
+        "message": "<Consequence> kind must be one of 'gain' | 'cost' | 'threat' | 'ritual'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='ConsequenceChip'] > JSXAttribute > JSXIdentifier[name!=/^(?:kind|children|style|key|ref|className|style|children)$/]",
+        "message": "<ConsequenceChip> doesn't accept that prop. Declared props: kind, children, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='ConsequenceChip'] > JSXAttribute[name.name='kind'] > Literal[value!=/^(?:gain|cost|threat|ritual)$/]",
+        "message": "<ConsequenceChip> kind must be one of 'gain' | 'cost' | 'threat' | 'ritual'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='EventCard'] > JSXAttribute > JSXIdentifier[name!=/^(?:kind|title|body|tags|open|onClick|style|key|ref|className|style|children)$/]",
+        "message": "<EventCard> doesn't accept that prop. Declared props: kind, title, body, tags, open, onClick, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Meter'] > JSXAttribute > JSXIdentifier[name!=/^(?:value|max|label|style|key|ref|className|style|children)$/]",
+        "message": "<Meter> doesn't accept that prop. Declared props: value, max, label, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='PressureBar'] > JSXAttribute > JSXIdentifier[name!=/^(?:value|max|label|style|key|ref|className|style|children)$/]",
+        "message": "<PressureBar> doesn't accept that prop. Declared props: value, max, label, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='ResourceCard'] > JSXAttribute > JSXIdentifier[name!=/^(?:resource|style|key|ref|className|style|children)$/]",
+        "message": "<ResourceCard> doesn't accept that prop. Declared props: resource, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='ResourceCard'] > JSXAttribute[name.name='resource'] > Literal[value!=/^(?:money|food|cultists|prisoners|relics|suspicion)$/]",
+        "message": "<ResourceCard> resource must be one of 'money' | 'food' | 'cultists' | 'prisoners' | 'relics' | 'suspicion'."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='StatPill'] > JSXAttribute > JSXIdentifier[name!=/^(?:glyph|label|value|title|style|key|ref|className|style|children)$/]",
+        "message": "<StatPill> doesn't accept that prop. Declared props: glyph, label, value, title, style."
+      },
+      {
+        "selector": "JSXOpeningElement[name.name='Tag'] > JSXAttribute > JSXIdentifier[name!=/^(?:children|style|key|ref|className|style|children)$/]",
+        "message": "<Tag> doesn't accept that prop. Declared props: children, style."
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/index.js"
+      ],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ],
+  "x-omelette": {
+    "components": {
+      "Button": {
+        "replaces": []
+      },
+      "Consequence": {
+        "replaces": []
+      },
+      "ConsequenceChip": {
+        "replaces": []
+      },
+      "EventCard": {
+        "replaces": []
+      },
+      "Meter": {
+        "replaces": []
+      },
+      "PressureBar": {
+        "replaces": []
+      },
+      "ResourceCard": {
+        "replaces": []
+      },
+      "StatPill": {
+        "replaces": []
+      },
+      "Tag": {
+        "replaces": []
+      }
+    },
+    "tokens": [
+      "--hh-accent",
+      "--hh-action-bg",
+      "--hh-action-bg-hover",
+      "--hh-action-fg",
+      "--hh-backdrop",
+      "--hh-backdrop-altar",
+      "--hh-bg",
+      "--hh-bg-deep",
+      "--hh-black",
+      "--hh-blood",
+      "--hh-blue",
+      "--hh-border",
+      "--hh-border-gilt",
+      "--hh-border-gilt-strong",
+      "--hh-border-threat",
+      "--hh-border-width",
+      "--hh-card-aspect",
+      "--hh-column-max",
+      "--hh-cream",
+      "--hh-cultists",
+      "--hh-danger",
+      "--hh-display",
+      "--hh-display-sm",
+      "--hh-duration-fast",
+      "--hh-duration-pulse",
+      "--hh-ease",
+      "--hh-faint",
+      "--hh-font-display",
+      "--hh-font-mono",
+      "--hh-font-sans",
+      "--hh-food",
+      "--hh-glow-alarm",
+      "--hh-glow-alarm-ring",
+      "--hh-glow-pressure",
+      "--hh-glow-red",
+      "--hh-gold",
+      "--hh-green",
+      "--hh-header-h",
+      "--hh-hit-min",
+      "--hh-info",
+      "--hh-leading-body",
+      "--hh-leading-snug",
+      "--hh-leading-tight",
+      "--hh-line",
+      "--hh-line-soft",
+      "--hh-money",
+      "--hh-muted",
+      "--hh-page-bg",
+      "--hh-prisoners",
+      "--hh-radius-lg",
+      "--hh-radius-md",
+      "--hh-radius-pill",
+      "--hh-radius-sm",
+      "--hh-radius-xs",
+      "--hh-red",
+      "--hh-red-bright",
+      "--hh-relics",
+      "--hh-resource-card-h",
+      "--hh-resource-card-w",
+      "--hh-ritual",
+      "--hh-shadow-color",
+      "--hh-shadow-header",
+      "--hh-shadow-lg",
+      "--hh-shadow-md",
+      "--hh-shadow-popup",
+      "--hh-shadow-sm",
+      "--hh-shadow-xl",
+      "--hh-sheen-gilt",
+      "--hh-space-1",
+      "--hh-space-10",
+      "--hh-space-2",
+      "--hh-space-3",
+      "--hh-space-4",
+      "--hh-space-5",
+      "--hh-space-6",
+      "--hh-space-7",
+      "--hh-space-8",
+      "--hh-space-9",
+      "--hh-success",
+      "--hh-surface",
+      "--hh-surface-2",
+      "--hh-surface-card",
+      "--hh-surface-overlay",
+      "--hh-suspicion",
+      "--hh-table-max",
+      "--hh-text",
+      "--hh-text-2xs",
+      "--hh-text-base",
+      "--hh-text-body",
+      "--hh-text-disabled",
+      "--hh-text-heading",
+      "--hh-text-label",
+      "--hh-text-lg",
+      "--hh-text-md",
+      "--hh-text-sm",
+      "--hh-text-xl",
+      "--hh-text-xs",
+      "--hh-tracking-display",
+      "--hh-tracking-label",
+      "--hh-tracking-wide",
+      "--hh-violet",
+      "--hh-weight-bold",
+      "--hh-weight-display",
+      "--hh-weight-medium",
+      "--hh-weight-regular",
+      "--hh-weight-semibold"
+    ],
+    "tokenKinds": {
+      "--hh-black": "color",
+      "--hh-bg": "color",
+      "--hh-bg-deep": "color",
+      "--hh-surface": "color",
+      "--hh-surface-2": "color",
+      "--hh-line": "color",
+      "--hh-line-soft": "color",
+      "--hh-text": "font",
+      "--hh-muted": "color",
+      "--hh-faint": "color",
+      "--hh-gold": "color",
+      "--hh-cream": "color",
+      "--hh-red": "color",
+      "--hh-red-bright": "color",
+      "--hh-blood": "color",
+      "--hh-green": "color",
+      "--hh-blue": "color",
+      "--hh-violet": "color",
+      "--hh-money": "color",
+      "--hh-food": "color",
+      "--hh-cultists": "color",
+      "--hh-prisoners": "color",
+      "--hh-relics": "color",
+      "--hh-suspicion": "color",
+      "--hh-shadow-color": "shadow",
+      "--hh-glow-red": "color",
+      "--hh-glow-alarm": "color",
+      "--hh-page-bg": "color",
+      "--hh-surface-card": "color",
+      "--hh-surface-overlay": "color",
+      "--hh-text-body": "font",
+      "--hh-text-label": "font",
+      "--hh-text-disabled": "font",
+      "--hh-text-heading": "font",
+      "--hh-border": "color",
+      "--hh-border-gilt": "color",
+      "--hh-border-gilt-strong": "color",
+      "--hh-border-threat": "color",
+      "--hh-action-bg": "color",
+      "--hh-action-bg-hover": "color",
+      "--hh-action-fg": "color",
+      "--hh-accent": "color",
+      "--hh-danger": "color",
+      "--hh-success": "color",
+      "--hh-info": "color",
+      "--hh-ritual": "color",
+      "--hh-font-sans": "font",
+      "--hh-font-display": "font",
+      "--hh-font-mono": "font",
+      "--hh-weight-regular": "font",
+      "--hh-weight-medium": "font",
+      "--hh-weight-semibold": "font",
+      "--hh-weight-bold": "font",
+      "--hh-weight-display": "font",
+      "--hh-text-2xs": "font",
+      "--hh-text-xs": "font",
+      "--hh-text-sm": "font",
+      "--hh-text-base": "font",
+      "--hh-text-md": "font",
+      "--hh-text-lg": "font",
+      "--hh-text-xl": "font",
+      "--hh-display-sm": "spacing",
+      "--hh-display": "font",
+      "--hh-leading-tight": "font",
+      "--hh-leading-snug": "font",
+      "--hh-leading-body": "font",
+      "--hh-tracking-display": "font",
+      "--hh-tracking-label": "font",
+      "--hh-tracking-wide": "font",
+      "--hh-space-1": "spacing",
+      "--hh-space-2": "spacing",
+      "--hh-space-3": "spacing",
+      "--hh-space-4": "spacing",
+      "--hh-space-5": "spacing",
+      "--hh-space-6": "spacing",
+      "--hh-space-7": "spacing",
+      "--hh-space-8": "spacing",
+      "--hh-space-9": "spacing",
+      "--hh-space-10": "spacing",
+      "--hh-radius-xs": "radius",
+      "--hh-radius-sm": "radius",
+      "--hh-radius-md": "radius",
+      "--hh-radius-lg": "radius",
+      "--hh-radius-pill": "radius",
+      "--hh-border-width": "spacing",
+      "--hh-header-h": "spacing",
+      "--hh-card-aspect": "other",
+      "--hh-resource-card-w": "spacing",
+      "--hh-resource-card-h": "spacing",
+      "--hh-table-max": "spacing",
+      "--hh-column-max": "spacing",
+      "--hh-hit-min": "spacing",
+      "--hh-shadow-sm": "shadow",
+      "--hh-shadow-md": "shadow",
+      "--hh-shadow-lg": "shadow",
+      "--hh-shadow-xl": "shadow",
+      "--hh-shadow-header": "shadow",
+      "--hh-shadow-popup": "shadow",
+      "--hh-glow-pressure": "shadow",
+      "--hh-glow-alarm-ring": "shadow",
+      "--hh-backdrop": "color",
+      "--hh-backdrop-altar": "other",
+      "--hh-sheen-gilt": "other",
+      "--hh-ease": "other",
+      "--hh-duration-fast": "other",
+      "--hh-duration-pulse": "other"
+    },
+    "fontFamilies": [
+      "Inter",
+      "JetBrains Mono"
+    ]
+  }
+}
