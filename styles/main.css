@@ -15,10 +15,24 @@
   --blue: #668aab;
   --shadow: rgba(0, 0, 0, 0.32);
   --header-h: 48px;
+  --hand-dock-h: 190px;
 }
 
 * {
   box-sizing: border-box;
+}
+
+/* Visually hidden but announced by screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 body {
@@ -331,7 +345,7 @@ h2 {
 /* ── Game screen ──────────────────────────── */
 
 .game-screen {
-  padding: 14px 16px 40px;
+  padding: 14px 16px calc(var(--hand-dock-h) + 24px);
   max-width: 1280px;
   margin: 0 auto;
 }
@@ -387,15 +401,8 @@ h2 {
 
 .table-center.is-event-open {
   display: grid;
-  grid-template-columns: minmax(280px, 42%) minmax(300px, 48%);
-  grid-template-areas:
-    "event choices"
-    "event choices"
-    "ritual choices"
-    "pressure pressure"
-    "hand hand";
+  grid-template-columns: minmax(280px, 42%) 1fr;
   justify-content: center;
-  align-items: start;
   gap: clamp(18px, 4vw, 56px);
   width: min(100%, 1100px);
 }
@@ -418,8 +425,7 @@ h2 {
 }
 
 .table-center.is-event-open .event-card {
-  grid-column: 1;
-  grid-row: 1 / span 3;
+  align-self: start;
   width: 100%;
   max-width: none;
 }
@@ -457,6 +463,10 @@ h2 {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin-top: 3px;
+}
+
+.event-card--open .event-closed-hint {
+  display: none;
 }
 
 .event-summary {
@@ -525,11 +535,21 @@ h2 {
   width: 100%;
 }
 
-.table-center.is-event-open .choice-panel {
-  grid-column: 2;
-  grid-row: 1 / span 3;
-  align-self: start;
+.table-choices-col {
   width: 100%;
+}
+
+.table-center.is-event-open .table-choices-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.table-center.is-event-open .choice-panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .ritual-inline {
@@ -544,13 +564,7 @@ h2 {
 }
 
 .table-center.is-event-open .ritual-inline {
-  grid-column: 2;
-  grid-row: 1;
   width: 100%;
-}
-
-.table-center.is-event-open .ritual-inline:not([hidden]) + .choice-panel {
-  grid-row: 2 / span 2;
 }
 
 .ritual-inline[hidden] {
@@ -576,6 +590,9 @@ h2 {
   flex-direction: column;
   gap: clamp(14px, 2.2vw, 24px);
   align-items: stretch;
+  flex: 1;
+  min-height: 0;
+  justify-content: space-between;
 }
 
 /* ── Choice card (in-game options) ──────────── */
@@ -595,25 +612,56 @@ h2 {
   cursor: pointer;
 }
 
-.choice-card:hover:not(:disabled) {
-  border-color: var(--red);
+.choice-card:hover:not(:disabled):not([data-state="impossible"]) {
+  border-color: var(--gold);
 }
 
-.choice-card:disabled {
+/* ── Choice states (logic drives data-state; CSS only styles it) ── */
+
+.choice-card[data-state="impossible"] {
   cursor: not-allowed;
-  opacity: 0.58;
+  opacity: 0.46;
 }
 
-.choice-card.danger {
-  border-color: rgba(192, 48, 30, 0.62);
+.choice-card[data-state="locked"] {
+  cursor: pointer;
 }
 
-.choice-card.success {
-  border-color: rgba(113, 152, 107, 0.44);
+.choice-card[data-state="needs-resources"] {
+  cursor: not-allowed;
+  background: rgba(18, 15, 12, 0.82);
+  border-color: rgba(210, 170, 92, 0.13);
+  color: rgba(238, 231, 220, 0.58);
 }
 
-.choice-card.info {
-  border-color: rgba(102, 138, 171, 0.44);
+.choice-card[data-state="needs-resources"][data-cost-tone="threat"] {
+  background: rgba(38, 10, 7, 0.42);
+  border-color: rgba(192, 48, 30, 0.24);
+}
+
+.choice-card[data-state="blocked-by-picks"] {
+  cursor: not-allowed;
+  background: rgba(18, 15, 12, 0.66);
+  border-color: rgba(182, 170, 155, 0.12);
+  opacity: 0.68;
+}
+
+.choice-card[data-state="needs-resources"] .choice-card__label,
+.choice-card[data-state="blocked-by-picks"] .choice-card__label {
+  color: rgba(238, 231, 220, 0.62);
+}
+
+.choice-card[data-state="needs-resources"] .csq {
+  opacity: 0.62;
+}
+
+.choice-card[data-state="selecting"] {
+  border-color: rgba(210, 170, 92, 0.55);
+  box-shadow: 0 0 0 1px rgba(210, 170, 92, 0.18);
+}
+
+.choice-card[data-state="ready"] {
+  border-color: rgba(210, 170, 92, 0.42);
 }
 
 .choice-card__label {
@@ -625,10 +673,6 @@ h2 {
   margin-bottom: clamp(10px, 1.6vw, 16px);
   color: var(--text);
 }
-
-.choice-card.danger .choice-card__label  { color: var(--blood); }
-.choice-card.success .choice-card__label { color: var(--green); }
-.choice-card.info .choice-card__label    { color: var(--blue); }
 
 .choice-card__consequences {
   border-top: 1px solid var(--line);
@@ -735,16 +779,9 @@ h2 {
 
 /* ── Pressure area ────────────────────────── */
 
-.pressure-area {
-  width: 100%;
-  min-height: 20px;
-}
-
-.table-center.is-event-open .pressure-area {
-  grid-column: 1 / -1;
-  grid-row: 4;
-  width: min(100%, 760px);
-  justify-self: center;
+.dock-pressure {
+  flex: 1;
+  min-width: 0;
 }
 
 .pressure-bar {
@@ -775,27 +812,40 @@ h2 {
   box-shadow: 0 0 8px rgba(192, 48, 30, 0.48);
 }
 
+/* ── Hand dock (fixed footer) ─────────────── */
+
+.hand-dock {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  padding: 8px 16px 14px;
+  background: linear-gradient(to top, var(--bg) 72%, transparent);
+  border-top: 1px solid rgba(74, 64, 53, 0.38);
+}
+
 /* ── Resource hand ────────────────────────── */
+
+.dock-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 1100px;
+  margin: 0 auto 6px;
+}
+
+.dock-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
 
 .hand-panel {
   width: 100%;
-}
-
-.table-center.is-event-open .hand-panel {
-  grid-column: 1 / -1;
-  grid-row: 5;
-  width: min(100%, 760px);
-  justify-self: center;
-}
-
-.hand-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.hand-header__spacer {
-  flex: 1;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
 .panic-quick-btn {
@@ -867,6 +917,43 @@ h2 {
   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
   color: var(--text);
   overflow: hidden;
+  /* button reset */
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: default;
+  text-align: left;
+  font: inherit;
+}
+
+/* ── Resource card selection states ──────────── */
+
+.resource-card[data-state="available"] {
+  cursor: pointer;
+  border-color: rgba(210, 170, 92, 0.42);
+  opacity: 1;
+}
+
+.resource-card[data-state="available"]:hover {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px rgba(210, 170, 92, 0.22), 0 10px 22px rgba(0, 0, 0, 0.22);
+}
+
+.resource-card[data-state="picked"] {
+  cursor: pointer;
+  border-color: var(--gold);
+  outline: 2px solid rgba(210, 170, 92, 0.5);
+  outline-offset: 1px;
+  box-shadow: 0 0 14px rgba(210, 170, 92, 0.22), 0 10px 22px rgba(0, 0, 0, 0.22);
+}
+
+.resource-card[data-state="irrelevant"] {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.resource-card[data-state="idle"],
+.resource-card:disabled {
+  cursor: default;
 }
 
 .resource-card::before {
@@ -1017,6 +1104,19 @@ h2 {
 .success { color: var(--green); }
 .info    { color: var(--blue); }
 
+/* ── Impossible-choice cost flash ────────────── */
+
+@keyframes costFlash {
+  0%   { background: transparent; }
+  30%  { background: rgba(192, 48, 30, 0.24); border-color: rgba(192, 48, 30, 0.7); }
+  100% { background: transparent; }
+}
+
+.choice-card.is-attempting .csq--cost,
+.choice-card.is-attempting .csq--threat {
+  animation: costFlash 0.62s ease forwards;
+}
+
 /* ── Responsive ───────────────────────────── */
 
 @media (max-width: 880px) {
@@ -1026,22 +1126,12 @@ h2 {
 
   .table-center.is-event-open {
     grid-template-columns: 1fr;
-    grid-template-areas:
-      "event"
-      "ritual"
-      "choices"
-      "pressure"
-      "hand";
     width: min(100%, 760px);
   }
 
-  .table-center.is-event-open .event-card,
-  .table-center.is-event-open .ritual-inline,
-  .table-center.is-event-open .choice-panel,
-  .table-center.is-event-open .pressure-area,
-  .table-center.is-event-open .hand-panel {
-    grid-column: 1;
-    grid-row: auto;
+  .table-center.is-event-open .table-choices-col {
+    /* On single-column layout the column is auto-height, not grid-stretched */
+    height: auto;
   }
 }
 
@@ -1051,7 +1141,11 @@ h2 {
   }
 
   .game-screen {
-    padding: 10px 12px 28px;
+    padding: 10px 12px calc(var(--hand-dock-h) + 20px);
+  }
+
+  .hand-dock {
+    padding: 6px 12px 12px;
   }
 
   .event-card {

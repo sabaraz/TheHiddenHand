@@ -1,9 +1,14 @@
 import { loadGameData, createGame } from "../engine/gameEngine.js";
 import { render } from "./render.js";
 import { saveGame, loadGame, clearGame } from "../storage/saveManager.js";
+import { emptyPicks, picksFromIds, isSelectionComplete } from "../rules/selectionModel.js";
 
 let context;
 let game;
+
+// In-progress resource picks. Separate from game state — never mutates resources.
+// { pickedIds: Set<string> } | null   (instance IDs like "Money:2", "Food:0")
+let selection = null;
 
 init();
 
@@ -126,18 +131,65 @@ function setMenuMessage(msg) {
 function draw() {
   const state = game.getState();
 
-  render(state, context, {
-    onChoice(choiceId) {
-      game.choose(choiceId);
+  const handlers = {
+    // Player opens an event card — make the hand interactive immediately.
+    onEventOpen() {
+      selection = { pickedIds: new Set() };
+      draw();
+    },
+
+    // Player clicks a paid choice: commit only if the current hand selection pays it.
+    onSelectChoice(choiceId, requirement) {
+      const picks = picksFromIds(selection?.pickedIds ?? new Set());
+      if (!isSelectionComplete(requirement, picks, state.resources)) return;
+      selection = null;
+      game.choose(choiceId, picks);
       saveGame(game.getState());
       draw();
     },
+
+    // Zero-cost (or ritual) choice: commit only with an empty hand selection.
+    onDirectChoice(choiceId) {
+      if ((selection?.pickedIds.size ?? 0) > 0) return;
+      selection = null;
+      game.choose(choiceId, emptyPicks());
+      saveGame(game.getState());
+      draw();
+    },
+
+    // Player toggles a specific resource card instance. cardId = "Money:2", "Food:0", etc.
+    onPickResource(cardId) {
+      if (!selection) return;
+      const next = new Set(selection.pickedIds);
+      if (next.has(cardId)) {
+        next.delete(cardId);
+      } else {
+        next.add(cardId);
+      }
+      selection = { pickedIds: next };
+      draw();
+    },
+
+    // Kept as safe fallback; not wired to any visible button.
+    onConfirm() {
+      draw();
+    },
+
+    // Cancel the in-progress selection.
+    onCancelSelection() {
+      selection = null;
+      draw();
+    },
+
     onRestart() {
+      selection = null;
       clearGame();
       game = createGame(context, null);
       game.addLog("Nova partida iniciada.");
       saveGame(game.getState());
       draw();
     }
-  });
+  };
+
+  render(state, context, handlers, selection);
 }

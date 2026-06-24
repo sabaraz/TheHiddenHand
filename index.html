@@ -53,28 +53,38 @@
         <div id="cycle-stats" class="cycle-stats compact-stats"></div>
       </div>
 
+      <!-- Screen-reader-only live region for selection status; no visual presence -->
+      <p id="selection-status-text" class="sr-only" aria-live="polite" aria-atomic="true"></p>
+
       <main class="game-table">
         <div class="table-center">
           <article id="event-card" class="event-card event-card--closed" aria-label="Carta de evento"></article>
-          <section class="ritual-inline" id="ritual-inline" aria-live="polite" hidden>
-            <div id="ritual"></div>
-          </section>
-          <section class="choice-panel" id="choices-section" aria-label="Op&#231;&#245;es" hidden>
-            <div id="choices" class="choice-list"></div>
-          </section>
-          <div class="pressure-area" id="pressure-bar-area" aria-label="Press&#227;o"></div>
-          <section class="hand-panel" aria-label="M&#227;o de recursos">
-            <div class="hand-header">
-              <div class="hand-header__spacer"></div>
-              <button class="panic-quick-btn" id="panic-quick" type="button" aria-label="Bot&#227;o do P&#226;nico" title="P&#226;nico">&#9888;&#65039;</button>
-              <span id="hand-count" class="hand-count"></span>
-            </div>
-            <div class="resource-hand-scroll">
-              <div id="resources" class="resource-hand"></div>
-            </div>
-          </section>
+          <div class="table-choices-col">
+            <section class="ritual-inline" id="ritual-inline" aria-live="polite" hidden>
+              <div id="ritual"></div>
+            </section>
+            <section class="choice-panel" id="choices-section" aria-label="Op&#231;&#245;es" hidden>
+              <div id="choices" class="choice-list"></div>
+            </section>
+          </div>
         </div>
       </main>
+
+      <!-- Hand dock: fixed to viewport bottom, never pushed by content reflow -->
+      <div class="hand-dock">
+        <div class="dock-header">
+          <div id="pressure-bar-area" class="dock-pressure" aria-label="Press&#227;o"></div>
+          <div class="dock-controls">
+            <button class="panic-quick-btn" id="panic-quick" type="button" aria-label="Bot&#227;o do P&#226;nico" title="P&#226;nico">&#9888;&#65039;</button>
+            <span id="hand-count" class="hand-count"></span>
+          </div>
+        </div>
+        <section class="hand-panel" aria-label="M&#227;o de recursos">
+          <div class="resource-hand-scroll">
+            <div id="resources" class="resource-hand"></div>
+          </div>
+        </section>
+      </div>
     </div>
 
     <template id="choice-template">

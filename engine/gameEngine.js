@@ -5,6 +5,7 @@ import { resolveEffects } from "./effectResolver.js";
 import { getRitualCost, canAdvanceRitual } from "./ritualEngine.js";
 import { getVisibleCost, hasResourcesForCost, payCost } from "../rules/costRules.js";
 import { canBrutalize } from "../rules/escalationRules.js";
+import { buildRequirement, isSelectionComplete } from "../rules/selectionModel.js";
 
 export async function loadGameData() {
   const [eventPools, cycleConfig, rituals] = await Promise.all([
@@ -57,7 +58,7 @@ export function createGame(context, savedState = null) {
       return cloneState(state);
     },
 
-    choose(choiceId) {
+    choose(choiceId, picks = null) {
       if (state.gameStatus !== "playing") return cloneState(state);
       const event = state.currentEvent;
       const option = findChoice(event, choiceId);
@@ -67,13 +68,30 @@ export function createGame(context, savedState = null) {
         return cloneState(state);
       }
 
-      if (!canPayOption(state, option, context)) {
-        state.log.push("Recursos insuficientes para essa escolha.");
-        return cloneState(state);
-      }
-
-      if (!option.usesRitualCost) {
-        payCost(state.resources, option.cost, Boolean(option.allowRelicSubstitution));
+      if (option.usesRitualCost) {
+        // Ritual advance path: cost is paid internally by advanceRitual via payCost.
+        if (!canPayOption(state, option, context)) {
+          state.log.push("Recursos insuficientes para essa escolha.");
+          return cloneState(state);
+        }
+      } else {
+        // Player-selection path: debit exactly what the player picked.
+        const cost = getChoiceCost(state, option, context);
+        const requirement = buildRequirement(cost, Boolean(option.allowRelicSubstitution));
+        if (requirement.length > 0) {
+          if (!picks || !isSelectionComplete(requirement, picks, state.resources)) {
+            state.log.push("Seleção de recursos inválida.");
+            return cloneState(state);
+          }
+          const spent = [];
+          for (const [r, count] of Object.entries(picks)) {
+            if (count > 0) {
+              state.resources[r] = Math.max(0, (state.resources[r] || 0) - count);
+              spent.push(`${count} ${r}`);
+            }
+          }
+          if (spent.length) state.log.push(`Gasto: ${spent.join(", ")}.`);
+        }
       }
 
       state.turn += 1;

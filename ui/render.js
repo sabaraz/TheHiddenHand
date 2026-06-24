@@ -1,34 +1,66 @@
 import { RESOURCE_NAMES } from "../engine/initialState.js";
 import { getChoiceCost, canPayOption } from "../engine/gameEngine.js";
 import { getActiveStage } from "../engine/ritualEngine.js";
+import {
+  buildRequirement,
+  canEverAfford,
+  isSelectionComplete,
+  picksFromIds
+} from "../rules/selectionModel.js";
 
 let isEventOpen = false;
 let lastRenderedEventId = null;
 let dragScrollReady = false;
 
-export function render(state, context, handlers) {
+export function render(state, context, handlers, selection = null) {
   renderCycleStats(state);
   renderLog(state);
-  renderEvent(state, context, handlers);
+  renderEvent(state, context, handlers, selection);
   renderRitual(state, context);
-  renderResourceHand(state);
+  renderResourceHand(state, selection, handlers);
   renderPressureBar(state);
+  renderSelectionBar(state, selection);
 }
 
-function renderResourceHand(state) {
+// ── Resource hand ─────────────────────────────────────────────────────────────
+
+function renderResourceHand(state, selection, handlers) {
   const container = document.querySelector("#resources");
   const handCount = document.querySelector("#hand-count");
   const cards = [];
 
+  const handIsInteractive = Boolean(selection && state.currentEvent && isEventOpen);
+
   for (const resource of RESOURCE_NAMES) {
     const amount = Math.max(0, state.resources[resource] || 0);
+
     for (let index = 0; index < amount; index += 1) {
-      const card = document.createElement("div");
+      const cardId = `${resource}:${index}`;
+      const isPicked = handIsInteractive && Boolean(selection?.pickedIds.has(cardId));
+
+      // Always a <button> for consistent focus behaviour.
+      const card = document.createElement("button");
+      card.type = "button";
       card.className = `resource-card resource-card--${resource.toLowerCase()}`;
-      card.setAttribute("aria-label", getResourceCardLabel(resource));
+
+      const label = getResourceCardLabel(resource);
+
+      if (handIsInteractive) {
+        card.dataset.state = isPicked ? "picked" : "available";
+        card.setAttribute("aria-pressed", String(isPicked));
+        card.setAttribute("aria-label", `${label}${isPicked ? " — selecionado" : " — selecionar"}`);
+        card.addEventListener("click", () => {
+          handlers.onPickResource(cardId);
+        });
+      } else {
+        card.dataset.state = "idle";
+        card.setAttribute("aria-label", label);
+        card.disabled = true;
+      }
+
       card.innerHTML = `
         <span class="resource-card-mark">${getResourceMark(resource)}</span>
-        <strong>${getResourceCardLabel(resource)}</strong>
+        <strong>${label}</strong>
       `;
       cards.push(card);
     }
@@ -48,29 +80,58 @@ function setupDragScroll() {
   if (!scroll) return;
 
   let active = false;
+  let captured = false;
   let startX = 0;
   let originLeft = 0;
 
   scroll.addEventListener("pointerdown", (e) => {
     active = true;
-    scroll.setPointerCapture(e.pointerId);
+    captured = false;
     startX = e.clientX;
     originLeft = scroll.scrollLeft;
-    scroll.classList.add("is-dragging");
   });
 
   scroll.addEventListener("pointermove", (e) => {
     if (!active) return;
-    scroll.scrollLeft = originLeft - (e.clientX - startX);
+    const dx = e.clientX - startX;
+    // Only capture after a real drag so clicks on buttons still fire normally.
+    if (!captured && Math.abs(dx) > 4) {
+      captured = true;
+      scroll.setPointerCapture(e.pointerId);
+      scroll.classList.add("is-dragging");
+    }
+    if (captured) {
+      scroll.scrollLeft = originLeft - dx;
+    }
   });
 
   const stopDrag = () => {
     active = false;
+    captured = false;
     scroll.classList.remove("is-dragging");
   };
   scroll.addEventListener("pointerup", stopDrag);
   scroll.addEventListener("pointercancel", stopDrag);
 }
+
+// ── Selection status (screen-reader only; no visual bar) ──────────────────────
+
+function renderSelectionBar(state, selection) {
+  const statusEl = document.querySelector("#selection-status-text");
+  if (!statusEl) return;
+
+  if (!selection || !state.currentEvent) {
+    statusEl.textContent = "";
+    return;
+  }
+
+  const selectedCount = selection.pickedIds.size;
+  statusEl.textContent = selectedCount === 0
+    ? "Nenhum recurso selecionado."
+    : `${selectedCount} recurso${selectedCount > 1 ? "s" : ""} selecionado${selectedCount > 1 ? "s" : ""}.`;
+}
+
+// ── Cycle stats & log ──────────────────────────────────────────────────────────
 
 function renderCycleStats(state) {
   document.querySelector("#cycle-stats").innerHTML = `
@@ -79,6 +140,17 @@ function renderCycleStats(state) {
     <span aria-label="Cartas restantes">▰ ${state.deck.length}</span>
   `;
 }
+
+function renderLog(state) {
+  const entries = state.log.slice(-20).map((entry) => {
+    const li = document.createElement("li");
+    li.textContent = entry;
+    return li;
+  });
+  document.querySelector("#log").replaceChildren(...entries);
+}
+
+// ── Ritual ────────────────────────────────────────────────────────────────────
 
 function renderRitual(state, context) {
   const container = document.querySelector("#ritual");
@@ -124,14 +196,7 @@ function renderRitual(state, context) {
   `;
 }
 
-function renderLog(state) {
-  const entries = state.log.slice(-20).map((entry) => {
-    const li = document.createElement("li");
-    li.textContent = entry;
-    return li;
-  });
-  document.querySelector("#log").replaceChildren(...entries);
-}
+// ── Pressure bar ──────────────────────────────────────────────────────────────
 
 function renderPressureBar(state) {
   const area = document.querySelector("#pressure-bar-area");
@@ -144,7 +209,9 @@ function renderPressureBar(state) {
   area.innerHTML = `<div class="pressure-bar"><span class="pressure-bar__label">Press&#227;o</span>${frags}</div>`;
 }
 
-function renderEvent(state, context, handlers) {
+// ── Event card & choices ───────────────────────────────────────────────────────
+
+function renderEvent(state, context, handlers, selection) {
   const card = document.querySelector("#event-card");
   const tableCenter = document.querySelector(".table-center");
   const choicesSection = document.querySelector("#choices-section");
@@ -213,17 +280,15 @@ function renderEvent(state, context, handlers) {
     `;
     choicesSection.hidden = true;
 
-    card.onclick = () => {
+    const openEvent = () => {
       isEventOpen = true;
-      renderEvent(state, context, handlers);
-      renderRitual(state, context);
+      handlers.onEventOpen();
     };
+    card.onclick = openEvent;
     card.onkeydown = (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        isEventOpen = true;
-        renderEvent(state, context, handlers);
-        renderRitual(state, context);
+        openEvent();
       }
     };
   } else {
@@ -239,7 +304,6 @@ function renderEvent(state, context, handlers) {
       <div class="event-card-inner">
         <div class="event-kicker">
           <span class="event-type">${event.kind}</span>
-          <span class="event-closed-hint">toque para abrir</span>
         </div>
         <h3>${event.title}</h3>
         <p class="event-summary">${event.body}</p>
@@ -252,13 +316,42 @@ function renderEvent(state, context, handlers) {
     for (const choice of event.choices) {
       const node = template.content.firstElementChild.cloneNode(true);
       const cost = getChoiceCost(state, choice, context.rituals);
-      const canPay = canPayOption(state, choice, context);
-      const { gains, costs } = buildConsequences(choice, cost);
 
-      node.classList.toggle("danger", choice.tone === "danger");
-      node.classList.toggle("success", choice.tone === "success");
-      node.classList.toggle("info", choice.tone === "info");
-      node.disabled = !canPay;
+      // Ritual choices keep the old affordability check; their debit is internal.
+      const isRitual = Boolean(choice.usesRitualCost);
+      const requirement = isRitual
+        ? []
+        : buildRequirement(cost, Boolean(choice.allowRelicSubstitution));
+
+      const canAfford = isRitual
+        ? canPayOption(state, choice, context)
+        : canEverAfford(requirement, state.resources);
+
+      const { gains, costs } = buildConsequences(choice, cost);
+      const picks = picksFromIds(selection?.pickedIds ?? new Set());
+      const hasPicks = (selection?.pickedIds?.size ?? 0) > 0;
+      const hasResourceCost = requirement.length > 0;
+      const selectedResourcesPayCost = hasResourceCost
+        ? isSelectionComplete(requirement, picks, state.resources)
+        : false;
+      const blocksFreeChoice = !hasResourceCost && hasPicks;
+
+      // data-state drives all CSS — never raw class-based tone.
+      let choiceState;
+      if (!canAfford) {
+        choiceState = "impossible";
+      } else if (hasResourceCost && !selectedResourcesPayCost) {
+        choiceState = "needs-resources";
+      } else if (blocksFreeChoice) {
+        choiceState = "blocked-by-picks";
+      } else {
+        choiceState = "ready";
+      }
+
+      node.dataset.state = choiceState;
+      node.dataset.costTone = costs.some((item) => item.kind === "threat") ? "threat" : "cost";
+      // disabled = HTML attribute only when truly impossible (aria + pointer).
+      node.disabled = !canAfford;
 
       node.querySelector(".choice-card__label").textContent = choice.label;
 
@@ -273,11 +366,26 @@ function renderEvent(state, context, handlers) {
         ? costs.map((c) => `<span class="csq csq--${c.kind}">${c.text}</span>`).join("")
         : `<span class="csq csq--empty">&#8212;</span>`;
 
-      node.addEventListener("click", () => handlers.onChoice(choice.id));
+      node.addEventListener("click", () => {
+        if (!canAfford || choiceState === "needs-resources" || choiceState === "blocked-by-picks") {
+          node.classList.add("is-attempting");
+          setTimeout(() => node.classList.remove("is-attempting"), 650);
+          return;
+        }
+        if (isRitual || !hasResourceCost) {
+          // Zero cost or ritual: commit immediately, no resource picking needed.
+          handlers.onDirectChoice(choice.id);
+        } else {
+          handlers.onSelectChoice(choice.id, requirement);
+        }
+      });
+
       choiceList.append(node);
     }
   }
 }
+
+// ── Consequence chips ─────────────────────────────────────────────────────────
 
 function buildConsequences(choice, cost) {
   const gains = [];
@@ -287,7 +395,7 @@ function buildConsequences(choice, cost) {
     if (amount <= 0) continue;
     const label = resource === "humanPower" ? "Cultists/Prisoners" : resource;
     const kind = resource === "Suspicion" ? "threat" : "cost";
-    costs.push({ text: `−${amount} ${label}`, kind });
+    costs.push({ text: `−${amount} ${label}`, kind });
   }
 
   for (const effect of (choice.effects || [])) {
@@ -295,16 +403,16 @@ function buildConsequences(choice, cost) {
       case "resource":
         if (effect.amount > 0) {
           const kind = effect.resource === "Suspicion" ? "threat" : "gain";
-          gains.push({ text: `+${effect.amount} ${effect.resource}`, kind });
+          gains.push({ text: `+${effect.amount} ${effect.resource}`, kind });
         } else if (effect.amount < 0) {
-          costs.push({ text: `−${Math.abs(effect.amount)} ${effect.resource}`, kind: "cost" });
+          costs.push({ text: `−${Math.abs(effect.amount)} ${effect.resource}`, kind: "cost" });
         }
         break;
       case "pressure":
         if (effect.amount > 0) {
-          costs.push({ text: `+${effect.amount} Pressure`, kind: "threat" });
+          costs.push({ text: `+${effect.amount} Pressure`, kind: "threat" });
         } else if (effect.amount < 0) {
-          gains.push({ text: `−${Math.abs(effect.amount)} Pressure`, kind: "gain" });
+          gains.push({ text: `−${Math.abs(effect.amount)} Pressure`, kind: "gain" });
         }
         break;
       case "startRitual":
@@ -312,11 +420,11 @@ function buildConsequences(choice, cost) {
         gains.push({ text: "Iniciar Ritual", kind: "ritual" });
         break;
       case "advanceRitual":
-        gains.push({ text: effect.unsafe ? "Ritual +2" : "Ritual +1", kind: "ritual" });
+        gains.push({ text: effect.unsafe ? "Ritual +2" : "Ritual +1", kind: "ritual" });
         break;
       case "advanceRitualChance": {
         const pct = Math.round((effect.successChance ?? 0.5) * 100);
-        gains.push({ text: `Ritual ${pct}%`, kind: "ritual" });
+        gains.push({ text: `Ritual ${pct}%`, kind: "ritual" });
         costs.push({ text: "Risco Falha", kind: "threat" });
         break;
       }
@@ -327,17 +435,19 @@ function buildConsequences(choice, cost) {
         gains.push({ text: "Estabilizar Ritual", kind: "ritual" });
         break;
       case "stabilizeCycle":
-        gains.push({ text: `−${effect.amount} Pressure`, kind: "gain" });
+        gains.push({ text: `−${effect.amount} Pressure`, kind: "gain" });
         break;
     }
   }
 
   if (choice.destination === "stabilize") {
-    gains.push({ text: "−1 Pressure", kind: "gain" });
+    gains.push({ text: "−1 Pressure", kind: "gain" });
   }
 
   return { gains, costs };
 }
+
+// ── Resource card labels ───────────────────────────────────────────────────────
 
 function getResourceCardLabel(resource) {
   const labels = {
