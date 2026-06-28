@@ -6,6 +6,7 @@
       "kind": "mandatory",
       "cycleBehavior": "persistent",
       "tags": ["food", "apocalyptic"],
+      "trigger": { "resource": "Food", "op": "<=", "value": 0 },
       "body": "The cabinets are bare. Those sharing the space look at one another with calculating eyes.",
       "choices": [
         {
@@ -32,7 +33,8 @@
           "label": "Let the shortage run its course",
           "effects": [
             { "type": "resource", "resource": "Cultists", "amount": -1 },
-            { "type": "resource", "resource": "Suspicion", "amount": 2 }
+            { "type": "resource", "resource": "Suspicion", "amount": 2 },
+            { "type": "defeat" }
           ],
           "destination": "return",
           "tone": "danger"
@@ -45,6 +47,7 @@
       "kind": "mandatory",
       "cycleBehavior": "persistent",
       "tags": ["suspicion", "apocalyptic"],
+      "trigger": { "resource": "Suspicion", "op": ">=", "value": 5 },
       "body": "Boots cross the threshold before anyone remembers to lock the door.",
       "choices": [
         {
@@ -69,7 +72,8 @@
           "label": "Scatter into the alleys",
           "effects": [
             { "type": "resource", "resource": "Cultists", "amount": -1 },
-            { "type": "resource", "resource": "Suspicion", "amount": -2 }
+            { "type": "resource", "resource": "Suspicion", "amount": -2 },
+            { "type": "defeat" }
           ],
           "destination": "brutalize",
           "upgradeTo": "raid-brutal",
@@ -83,6 +87,7 @@
       "kind": "mandatory",
       "cycleBehavior": "persistent",
       "tags": ["money", "cult", "escalation"],
+      "trigger": { "resource": "_sum", "op": ">=", "value": 15 },
       "body": "Accumulation has its own gravity. People notice what they are not meant to see.",
       "choices": [
         {
@@ -115,6 +120,386 @@
           ],
           "destination": "remove",
           "tone": "info"
+        }
+      ]
+    },
+    {
+      "id": "mandatory-famine-warn",
+      "title": "Empty Eyes",
+      "kind": "mandatory",
+      "cycleBehavior": "persistent",
+      "tags": ["food", "apocalyptic"],
+      "trigger": { "resource": "Food", "op": "<=", "value": 1 },
+      "mandatoryPath": "starvation",
+      "body": "Hungry eyes watch the last crumbs vanish.",
+      "choices": [
+        {
+          "id": "famine-cache",
+          "label": "Open hidden jars",
+          "cost": { "Money": 1 },
+          "effects": [{ "type": "resource", "resource": "Food", "amount": 2 }],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "famine-cull",
+          "label": "Whisper names and make a list",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Food", "amount": 3 },
+            { "type": "resource", "resource": "Suspicion", "amount": 1 }
+          ],
+          "destination": "remove",
+          "tone": "danger"
+        },
+        {
+          "id": "famine-endure",
+          "label": "Endure the hunger together",
+          "effects": [
+            { "type": "resource", "resource": "Cultists", "amount": -1 },
+            { "type": "resource", "resource": "Suspicion", "amount": 2 }
+          ],
+          "destination": "return",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "mandatory-food-riot",
+      "title": "Ravenous Crowd",
+      "kind": "mandatory",
+      "cycleBehavior": "persistent",
+      "tags": ["food", "escalation", "cult"],
+      "trigger": { "and": [
+        { "resource": "Food", "op": "<=", "value": 0 },
+        { "resource": "Cultists", "op": ">=", "value": 3 }
+      ]},
+      "mandatoryPath": "starvation",
+      "body": "Desperate hands reach for anything edible, and voices rise in anger.",
+      "choices": [
+        {
+          "id": "riot-promise",
+          "label": "Promise deliveries that do not exist",
+          "cost": { "Money": 2 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -1 }],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "riot-suppress",
+          "label": "Force them back with threats",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Cultists", "amount": -1 },
+            { "type": "resource", "resource": "Suspicion", "amount": -2 }
+          ],
+          "destination": "remove",
+          "tone": "danger"
+        },
+        {
+          "id": "riot-split",
+          "label": "Let them take what is left",
+          "effects": [
+            { "type": "resource", "resource": "Food", "amount": -1 },
+            { "type": "pressure", "amount": 2 }
+          ],
+          "destination": "return",
+          "tone": "info"
+        }
+      ]
+    },
+    {
+      "id": "mandatory-famine-purge",
+      "title": "Silent Decision",
+      "kind": "mandatory",
+      "cycleBehavior": "persistent",
+      "tags": ["food", "cult", "escalation"],
+      "trigger": { "and": [
+        { "resource": "Food", "op": "<=", "value": 0 },
+        { "resource": "Money", "op": "<=", "value": 0 }
+      ]},
+      "mandatoryPath": "starvation",
+      "body": "The strongest look at the weakest and agree without words.",
+      "choices": [
+        {
+          "id": "purge-draw-lots",
+          "label": "Draw lots to decide who goes",
+          "cost": { "humanPower": 2 },
+          "effects": [
+            { "type": "resource", "resource": "Food", "amount": 4 },
+            { "type": "resource", "resource": "Suspicion", "amount": 3 }
+          ],
+          "destination": "remove",
+          "tone": "danger"
+        },
+        {
+          "id": "purge-bargain",
+          "label": "Bargain with outsiders for provisions",
+          "cost": { "Money": 3 },
+          "effects": [
+            { "type": "resource", "resource": "Food", "amount": 2 },
+            { "type": "resource", "resource": "Suspicion", "amount": -2 }
+          ],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "purge-flee",
+          "label": "Abandon the place entirely",
+          "effects": [
+            { "type": "resource", "resource": "Cultists", "amount": -2 },
+            { "type": "resource", "resource": "Suspicion", "amount": -1 }
+          ],
+          "destination": "remove",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "mandatory-notoriety",
+      "title": "Spotlight",
+      "kind": "mandatory",
+      "cycleBehavior": "persistent",
+      "tags": ["suspicion", "apocalyptic"],
+      "trigger": { "resource": "Suspicion", "op": ">=", "value": 4 },
+      "mandatoryPath": "broadcast",
+      "body": "Eyes you cannot see now turn toward you.",
+      "choices": [
+        {
+          "id": "spotlight-bribe",
+          "label": "Pay the host to change the subject",
+          "cost": { "Money": 3 },
+          "allowRelicSubstitution": true,
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -3 }],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "spotlight-scapegoat",
+          "label": "Offer a scapegoat to the cameras",
+          "cost": { "Prisoners": 1 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -4 }],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "spotlight-fade",
+          "label": "Fade into side streets",
+          "effects": [
+            { "type": "resource", "resource": "Cultists", "amount": -1 },
+            { "type": "resource", "resource": "Suspicion", "amount": -2 }
+          ],
+          "destination": "brutalize",
+          "upgradeTo": "echo-chamber-brutal",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "mandatory-hacked-accounts",
+      "title": "Data Breach",
+      "kind": "mandatory",
+      "cycleBehavior": "persistent",
+      "tags": ["suspicion", "money"],
+      "trigger": { "resource": "Money", "op": "<=", "value": 0 },
+      "mandatoryPath": "broadcast",
+      "body": "Your accounts show transactions they should not show.",
+      "choices": [
+        {
+          "id": "breach-erase",
+          "label": "Erase logs and start over",
+          "effects": [
+            { "type": "resource", "resource": "Money", "amount": -1 },
+            { "type": "pressure", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "danger"
+        },
+        {
+          "id": "breach-fix",
+          "label": "Pay accountant to fix",
+          "cost": { "Money": 1 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -1 }],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "breach-outsource",
+          "label": "Hire outsider to bury it completely",
+          "cost": { "Money": 2, "humanPower": 1 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -2 }],
+          "destination": "remove",
+          "tone": "success"
+        }
+      ]
+    },
+    {
+      "id": "mandatory-deepfakes",
+      "title": "Deepfakes",
+      "kind": "mandatory",
+      "cycleBehavior": "persistent",
+      "tags": ["suspicion", "escalation"],
+      "trigger": { "resource": "Suspicion", "op": ">=", "value": 3 },
+      "mandatoryPath": "broadcast",
+      "body": "Footage of your gatherings circulates with altered voices.",
+      "choices": [
+        {
+          "id": "deepfake-counter",
+          "label": "Release a counter-narrative",
+          "cost": { "Money": 2 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -1 }],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "deepfake-blame",
+          "label": "Offer up a follower to take blame",
+          "cost": { "humanPower": 1 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -2 }],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "deepfake-ignore",
+          "label": "Ignore and hope the story dies",
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": 2 }],
+          "destination": "return",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "mandatory-cosmic-gaze",
+      "title": "Eye on the Horizon",
+      "kind": "mandatory",
+      "cycleBehavior": "persistent",
+      "tags": ["relic", "apocalyptic", "escalation"],
+      "trigger": { "resource": "Relics", "op": ">=", "value": 2 },
+      "mandatoryPath": "outer",
+      "body": "A shape at the edge of the sky urges you to look, promising answers you cannot unsee.",
+      "choices": [
+        {
+          "id": "gaze-board-up",
+          "label": "Board up every window",
+          "cost": { "Money": 2 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -2 }],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "gaze-offer",
+          "label": "Offer blood to the horizon",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Suspicion", "amount": -1 },
+            { "type": "pressure", "amount": 1 }
+          ],
+          "destination": "remove",
+          "tone": "danger"
+        },
+        {
+          "id": "gaze-stare",
+          "label": "Stare back defiantly",
+          "effects": [
+            { "type": "resource", "resource": "Suspicion", "amount": 3 },
+            { "type": "pressure", "amount": 2 }
+          ],
+          "destination": "return",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "mandatory-chaos-divide",
+      "title": "Schism",
+      "kind": "mandatory",
+      "cycleBehavior": "persistent",
+      "tags": ["cult", "escalation"],
+      "trigger": { "and": [
+        { "resource": "Cultists", "op": ">=", "value": 4 },
+        { "pressure": true, "op": ">=", "value": 2 }
+      ]},
+      "mandatoryPath": "outer",
+      "body": "Disagreements fracture the group as different forces whisper promises.",
+      "choices": [
+        {
+          "id": "schism-appease",
+          "label": "Appease the dissent with gifts",
+          "cost": { "Money": 2 },
+          "effects": [
+            { "type": "resource", "resource": "Cultists", "amount": -1 },
+            { "type": "resource", "resource": "Suspicion", "amount": -1 }
+          ],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "schism-fight",
+          "label": "Let them fight and hope the strong remain",
+          "effects": [
+            { "type": "resource", "resource": "Cultists", "amount": -2 },
+            { "type": "resource", "resource": "Suspicion", "amount": -1 }
+          ],
+          "destination": "remove",
+          "tone": "danger"
+        },
+        {
+          "id": "schism-pledge",
+          "label": "Swear fealty to a particular force",
+          "cost": { "Relics": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Cultists", "amount": 1 },
+            { "type": "resource", "resource": "Suspicion", "amount": 2 }
+          ],
+          "destination": "remove",
+          "tone": "info"
+        }
+      ]
+    },
+    {
+      "id": "mandatory-plague-swarm",
+      "title": "Buzzing Decay",
+      "kind": "mandatory",
+      "cycleBehavior": "persistent",
+      "tags": ["relic", "food", "escalation"],
+      "trigger": { "and": [
+        { "resource": "Food", "op": "<=", "value": 1 },
+        { "resource": "Relics", "op": ">=", "value": 1 }
+      ]},
+      "mandatoryPath": "outer",
+      "body": "An infestation begins that seems to answer someone's call.",
+      "choices": [
+        {
+          "id": "swarm-burn",
+          "label": "Burn the nests with chemicals",
+          "cost": { "Money": 2 },
+          "effects": [
+            { "type": "resource", "resource": "Food", "amount": -1 },
+            { "type": "resource", "resource": "Suspicion", "amount": -2 }
+          ],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "swarm-feed",
+          "label": "Feed the swarm to redirect it",
+          "cost": { "Food": 2 },
+          "effects": [
+            { "type": "pressure", "amount": 1 },
+            { "type": "resource", "resource": "Suspicion", "amount": -1 }
+          ],
+          "destination": "discard",
+          "tone": "info"
+        },
+        {
+          "id": "swarm-release",
+          "label": "Let the swarm into the city",
+          "effects": [
+            { "type": "resource", "resource": "Food", "amount": -2 },
+            { "type": "resource", "resource": "Suspicion", "amount": 2 }
+          ],
+          "destination": "return",
+          "tone": "danger"
         }
       ]
     }
@@ -243,9 +628,7 @@
         {
           "id": "ignore",
           "label": "Leave them — let the noise be their problem",
-          "effects": [
-            { "type": "resource", "resource": "Suspicion", "amount": 1 }
-          ],
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": 1 }],
           "destination": "return",
           "tone": "danger"
         },
@@ -456,9 +839,7 @@
         {
           "id": "redirect",
           "label": "Introduce a more interesting story nearby",
-          "effects": [
-            { "type": "resource", "resource": "Suspicion", "amount": 1 }
-          ],
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": 1 }],
           "destination": "discard",
           "tone": "info"
         }
@@ -573,6 +954,1434 @@
         {
           "id": "abandon-step",
           "label": "Accept this step as lost and recalibrate",
+          "effects": [
+            { "type": "ritualFailure" },
+            { "type": "pressure", "amount": 2 }
+          ],
+          "destination": "discard",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "forage-run",
+      "title": "Forage Run",
+      "kind": "common",
+      "cycleBehavior": "persistent",
+      "ritualPath": "starvation",
+      "tags": ["money", "food"],
+      "body": "The streets hold scraps if you know where to look.",
+      "choices": [
+        {
+          "id": "forage-watch",
+          "label": "Stay out of sight today",
+          "effects": [{ "type": "pressure", "amount": 1 }],
+          "destination": "defer",
+          "tone": "info"
+        },
+        {
+          "id": "forage-send-two",
+          "label": "Send a pair of quiet hands",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Money", "amount": 2 },
+            { "type": "resource", "resource": "Food", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "forage-long",
+          "label": "Scavenge until dark",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Money", "amount": 3 },
+            { "type": "resource", "resource": "Food", "amount": 1 },
+            { "type": "resource", "resource": "Suspicion", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "soup-kitchen",
+      "title": "Leaking Soup",
+      "kind": "common",
+      "cycleBehavior": "persistent",
+      "ritualPath": "starvation",
+      "tags": ["food", "cult"],
+      "body": "An old soup kitchen is rumoured to serve more than broth.",
+      "choices": [
+        {
+          "id": "soup-wait",
+          "label": "Queue quietly and wait",
+          "effects": [{ "type": "pressure", "amount": 1 }],
+          "destination": "defer",
+          "tone": "info"
+        },
+        {
+          "id": "soup-volunteer",
+          "label": "Volunteer behind the counter",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Food", "amount": 2 },
+            { "type": "resource", "resource": "Cultists", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "soup-steal",
+          "label": "Steal from the pantry",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Food", "amount": 3 },
+            { "type": "resource", "resource": "Suspicion", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "black-market-hunger",
+      "title": "Tin for a Price",
+      "kind": "common",
+      "cycleBehavior": "discardable",
+      "ritualPath": "starvation",
+      "tags": ["money", "food"],
+      "body": "Canned goods change hands under low lights.",
+      "choices": [
+        {
+          "id": "market-pass",
+          "label": "Pass on this shady trade",
+          "effects": [{ "type": "pressure", "amount": 1 }],
+          "destination": "defer",
+          "tone": "info"
+        },
+        {
+          "id": "market-buy",
+          "label": "Pay without questions",
+          "cost": { "Money": 2 },
+          "allowRelicSubstitution": true,
+          "effects": [{ "type": "resource", "resource": "Food", "amount": 4 }],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "market-pressure",
+          "label": "Strong-arm the seller",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Food", "amount": 3 },
+            { "type": "resource", "resource": "Suspicion", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "plague-rumor",
+      "title": "Whispered Fever",
+      "kind": "common",
+      "cycleBehavior": "scalable",
+      "ritualPath": "starvation",
+      "tags": ["suspicion", "escalation"],
+      "body": "Someone mentions a sickness that begins with emptiness.",
+      "choices": [
+        {
+          "id": "plague-let-spread",
+          "label": "Let it spread without comment",
+          "effects": [
+            { "type": "resource", "resource": "Suspicion", "amount": 2 },
+            { "type": "pressure", "amount": 1 }
+          ],
+          "destination": "upgrade",
+          "upgradeTo": "plague-rumor-brutal",
+          "tone": "danger"
+        },
+        {
+          "id": "plague-quarantine",
+          "label": "Quarantine the gossiper",
+          "cost": { "Money": 1, "humanPower": 1 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -2 }],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "plague-deflect",
+          "label": "Deflect with another story",
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": 1 }],
+          "destination": "discard",
+          "tone": "info"
+        }
+      ]
+    },
+    {
+      "id": "plague-rumor-brutal",
+      "title": "Fever Records",
+      "kind": "apocalyptic",
+      "cycleBehavior": "apocalyptic",
+      "ritualPath": "starvation",
+      "tags": ["suspicion", "escalation", "apocalyptic"],
+      "body": "The whispers have become written notices of quarantine.",
+      "choices": [
+        {
+          "id": "fever-erase",
+          "label": "Pay to erase the files",
+          "cost": { "Money": 2 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -3 }],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "fever-embrace",
+          "label": "Exploit the panic for recruitment",
+          "effects": [
+            { "type": "resource", "resource": "Cultists", "amount": 2 },
+            { "type": "resource", "resource": "Suspicion", "amount": 2 }
+          ],
+          "destination": "defer",
+          "tone": "danger"
+        },
+        {
+          "id": "fever-bribe",
+          "label": "Bribe officials to forget",
+          "cost": { "Money": 3 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -4 }],
+          "destination": "remove",
+          "tone": "success"
+        }
+      ]
+    },
+    {
+      "id": "cellar-secret",
+      "title": "Empty Cellar",
+      "kind": "common",
+      "cycleBehavior": "persistent",
+      "ritualPath": "starvation",
+      "tags": ["cult", "food"],
+      "body": "A padlocked door leads to a space that might hide a survivor.",
+      "choices": [
+        {
+          "id": "cellar-ignore",
+          "label": "Ignore the banging",
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": 1 }],
+          "destination": "defer",
+          "tone": "danger"
+        },
+        {
+          "id": "cellar-feed",
+          "label": "Feed the captive",
+          "cost": { "Food": 1 },
+          "effects": [{ "type": "resource", "resource": "Prisoners", "amount": 1 }],
+          "destination": "discard",
+          "tone": "info"
+        },
+        {
+          "id": "cellar-convert",
+          "label": "Recruit the desperate",
+          "cost": { "Food": 1, "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Cultists", "amount": 1 },
+            { "type": "resource", "resource": "Suspicion", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "success"
+        }
+      ]
+    },
+    {
+      "id": "relic-in-the-pot",
+      "title": "Hidden Idol",
+      "kind": "opportunity",
+      "cycleBehavior": "unique",
+      "ritualPath": "starvation",
+      "tags": ["relic", "money"],
+      "body": "Beneath a charred stew pot lies something cold and ancient.",
+      "choices": [
+        {
+          "id": "pot-mark",
+          "label": "Mark the spot and come back later",
+          "effects": [
+            { "type": "pressure", "amount": 1 },
+            { "type": "deferEvent", "eventId": "relic-in-the-pot" }
+          ],
+          "destination": "defer",
+          "tone": "info"
+        },
+        {
+          "id": "pot-claim",
+          "label": "Dig it out carefully",
+          "cost": { "Money": 2 },
+          "effects": [
+            { "type": "resource", "resource": "Relics", "amount": 1 },
+            { "type": "opportunityUsed", "eventId": "relic-in-the-pot" }
+          ],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "pot-grab",
+          "label": "Grab it now",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Relics", "amount": 1 },
+            { "type": "resource", "resource": "Suspicion", "amount": 1 },
+            { "type": "opportunityUsed", "eventId": "relic-in-the-pot" }
+          ],
+          "destination": "remove",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "ledger-of-hunger",
+      "title": "Scarred Accounts",
+      "kind": "common",
+      "cycleBehavior": "discardable",
+      "ritualPath": "starvation",
+      "tags": ["money", "suspicion"],
+      "body": "Your scribbles about food distribution resemble a confession.",
+      "choices": [
+        {
+          "id": "ledger-burn",
+          "label": "Burn the papers",
+          "effects": [
+            { "type": "resource", "resource": "Money", "amount": -1 },
+            { "type": "pressure", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "danger"
+        },
+        {
+          "id": "ledger-cook",
+          "label": "Rewrite the logs",
+          "cost": { "Money": 1 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -1 }],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "ledger-outsource",
+          "label": "Hire a fixer",
+          "cost": { "Money": 2, "humanPower": 1 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -2 }],
+          "destination": "remove",
+          "tone": "success"
+        }
+      ]
+    },
+    {
+      "id": "bone-lottery",
+      "title": "Bone Lottery",
+      "kind": "common",
+      "cycleBehavior": "discardable",
+      "ritualPath": "starvation",
+      "tags": ["cult", "money", "food"],
+      "body": "A group proposes a lottery where the loser feeds the group.",
+      "choices": [
+        {
+          "id": "lottery-join",
+          "label": "Join the lottery",
+          "cost": { "humanPower": 1 },
+          "effects": [{ "type": "resource", "resource": "Food", "amount": 2 }],
+          "destination": "discard",
+          "tone": "danger"
+        },
+        {
+          "id": "lottery-refuse",
+          "label": "Refuse publicly",
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -1 }],
+          "destination": "discard",
+          "tone": "info"
+        },
+        {
+          "id": "lottery-rig",
+          "label": "Secretly rig it",
+          "cost": { "Money": 2 },
+          "effects": [
+            { "type": "resource", "resource": "Food", "amount": 3 },
+            { "type": "resource", "resource": "Suspicion", "amount": 1 }
+          ],
+          "destination": "remove",
+          "tone": "success"
+        }
+      ]
+    },
+    {
+      "id": "famine-vision",
+      "title": "Hunger Pattern",
+      "kind": "ritual",
+      "cycleBehavior": "persistent",
+      "ritualPath": "starvation",
+      "setsRitualPath": "starvation",
+      "startsRitualId": "hungerRite",
+      "tags": ["ritual"],
+      "body": "In the dark, lines of hunger draw themselves across walls and dreams.",
+      "choices": [
+        {
+          "id": "hunger-dismiss",
+          "label": "Dismiss the pattern as hunger hallucinations",
+          "effects": [{ "type": "pressure", "amount": 1 }],
+          "destination": "defer",
+          "tone": "info"
+        },
+        {
+          "id": "hunger-trace",
+          "label": "Trace the lines with trembling fingers",
+          "cost": { "Money": 1, "humanPower": 1 },
+          "effects": [
+            { "type": "startSelectedRitual" },
+            { "type": "stabilizeCycle", "amount": 1 }
+          ],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "hunger-etch",
+          "label": "Carve the pattern into flesh",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "startSelectedRitual" },
+            { "type": "pressure", "amount": 2 }
+          ],
+          "destination": "remove",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "famine-work",
+      "title": "Night Cauldron",
+      "kind": "ritual",
+      "cycleBehavior": "persistent",
+      "requiresActiveRitual": true,
+      "ritualPath": "starvation",
+      "tags": ["ritual", "cult"],
+      "body": "The pot simmers with nothing but hope. Every hand must give something real.",
+      "choices": [
+        {
+          "id": "cauldron-add",
+          "label": "Add the required morsels as the pattern dictates",
+          "usesRitualCost": true,
+          "effects": [{ "type": "advanceRitual" }],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "cauldron-stretch",
+          "label": "Water down the brew to make it last",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Food", "amount": 1 },
+            { "type": "pressure", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "info"
+        },
+        {
+          "id": "cauldron-pray",
+          "label": "Pray for a miracle instead of following the recipe",
+          "effects": [{ "type": "advanceRitualChance", "successChance": 0.5 }],
+          "destination": "discard",
+          "tone": "info"
+        }
+      ]
+    },
+    {
+      "id": "famine-work-brutal",
+      "title": "Gnawed Bones",
+      "kind": "apocalyptic",
+      "cycleBehavior": "apocalyptic",
+      "requiresActiveRitual": true,
+      "ritualPath": "starvation",
+      "tags": ["ritual", "escalation", "apocalyptic"],
+      "body": "The pattern twists, demanding far more than is left to give.",
+      "choices": [
+        {
+          "id": "bones-correct",
+          "label": "Correct the pattern with precious supplies",
+          "cost": { "Money": 2, "humanPower": 1 },
+          "effects": [
+            { "type": "ritualStabilize" },
+            { "type": "stabilizeCycle", "amount": 2 }
+          ],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "bones-embrace",
+          "label": "Embrace starvation as communion",
+          "cost": { "Relics": 1 },
+          "effects": [
+            { "type": "advanceRitual", "unsafe": true },
+            { "type": "resource", "resource": "Suspicion", "amount": 2 }
+          ],
+          "destination": "defer",
+          "tone": "danger"
+        },
+        {
+          "id": "bones-abandon",
+          "label": "Abandon this step to stave off collapse",
+          "effects": [
+            { "type": "ritualFailure" },
+            { "type": "pressure", "amount": 2 }
+          ],
+          "destination": "discard",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "whisper-campaign",
+      "title": "Whisper Campaign",
+      "kind": "common",
+      "cycleBehavior": "persistent",
+      "ritualPath": "broadcast",
+      "tags": ["suspicion", "money"],
+      "body": "A story about you is spreading, told by unseen mouths.",
+      "choices": [
+        {
+          "id": "whisper-ignore",
+          "label": "Ignore the whispers",
+          "effects": [
+            { "type": "resource", "resource": "Suspicion", "amount": 2 },
+            { "type": "pressure", "amount": 1 }
+          ],
+          "destination": "defer",
+          "tone": "danger"
+        },
+        {
+          "id": "whisper-pay",
+          "label": "Pay to change the narrative",
+          "cost": { "Money": 1 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -1 }],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "whisper-counter",
+          "label": "Seed a counter-story",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Suspicion", "amount": -1 },
+            { "type": "pressure", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "info"
+        }
+      ]
+    },
+    {
+      "id": "viral-clip",
+      "title": "Viral Clip",
+      "kind": "common",
+      "cycleBehavior": "discardable",
+      "ritualPath": "broadcast",
+      "tags": ["money", "cult"],
+      "body": "A clip of your ritual goes viral without context.",
+      "choices": [
+        {
+          "id": "viral-claim",
+          "label": "Claim it as performance art",
+          "cost": { "Money": 1 },
+          "effects": [{ "type": "resource", "resource": "Cultists", "amount": 1 }],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "viral-remove",
+          "label": "Remove it using lawyers",
+          "cost": { "Money": 2 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -2 }],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "viral-leak",
+          "label": "Leak another clip as distraction",
+          "cost": { "Money": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Suspicion", "amount": 1 },
+            { "type": "resource", "resource": "Cultists", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "sponsored-ad",
+      "title": "Sponsored Ad",
+      "kind": "common",
+      "cycleBehavior": "persistent",
+      "ritualPath": "broadcast",
+      "tags": ["money", "cult"],
+      "body": "A local business offers sponsorship if you promote them.",
+      "choices": [
+        {
+          "id": "ad-accept",
+          "label": "Accept the sponsorship",
+          "effects": [
+            { "type": "resource", "resource": "Money", "amount": 2 },
+            { "type": "resource", "resource": "Suspicion", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "ad-refuse",
+          "label": "Refuse politely",
+          "effects": [{ "type": "pressure", "amount": 1 }],
+          "destination": "defer",
+          "tone": "info"
+        },
+        {
+          "id": "ad-blackmail",
+          "label": "Blackmail them for more",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Money", "amount": 3 },
+            { "type": "resource", "resource": "Suspicion", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "data-mining",
+      "title": "Data Mining",
+      "kind": "common",
+      "cycleBehavior": "discardable",
+      "ritualPath": "broadcast",
+      "tags": ["money", "suspicion"],
+      "body": "Someone offers to sell you data on those watching.",
+      "choices": [
+        {
+          "id": "data-buy",
+          "label": "Buy the data",
+          "cost": { "Money": 2 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -1 }],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "data-steal",
+          "label": "Steal the data",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Money", "amount": 1 },
+            { "type": "resource", "resource": "Suspicion", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "danger"
+        },
+        {
+          "id": "data-decline",
+          "label": "Decline and keep distance",
+          "effects": [{ "type": "pressure", "amount": 1 }],
+          "destination": "defer",
+          "tone": "info"
+        }
+      ]
+    },
+    {
+      "id": "pirated-feed",
+      "title": "Pirated Feed",
+      "kind": "opportunity",
+      "cycleBehavior": "unique",
+      "ritualPath": "broadcast",
+      "tags": ["relic", "suspicion"],
+      "body": "An unmarked drive arrives with a live feed from somewhere unreachable.",
+      "choices": [
+        {
+          "id": "feed-mark",
+          "label": "Watch later with care",
+          "effects": [
+            { "type": "pressure", "amount": 1 },
+            { "type": "deferEvent", "eventId": "pirated-feed" }
+          ],
+          "destination": "defer",
+          "tone": "info"
+        },
+        {
+          "id": "feed-decode",
+          "label": "Pay to decode it immediately",
+          "cost": { "Money": 3 },
+          "effects": [
+            { "type": "resource", "resource": "Relics", "amount": 1 },
+            { "type": "opportunityUsed", "eventId": "pirated-feed" }
+          ],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "feed-plug",
+          "label": "Plug it in anyway",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Relics", "amount": 1 },
+            { "type": "resource", "resource": "Suspicion", "amount": 1 },
+            { "type": "opportunityUsed", "eventId": "pirated-feed" }
+          ],
+          "destination": "remove",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "echo-chamber",
+      "title": "Echo Chamber",
+      "kind": "common",
+      "cycleBehavior": "scalable",
+      "ritualPath": "broadcast",
+      "tags": ["suspicion", "escalation"],
+      "body": "Your message only reaches those already listening.",
+      "choices": [
+        {
+          "id": "echo-let",
+          "label": "Let it continue",
+          "effects": [
+            { "type": "resource", "resource": "Suspicion", "amount": 2 },
+            { "type": "pressure", "amount": 1 }
+          ],
+          "destination": "upgrade",
+          "upgradeTo": "echo-chamber-brutal",
+          "tone": "danger"
+        },
+        {
+          "id": "echo-break",
+          "label": "Break out with a giveaway",
+          "cost": { "Money": 1, "humanPower": 1 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -2 }],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "echo-bots",
+          "label": "Amplify with bots",
+          "cost": { "Money": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Suspicion", "amount": 1 },
+            { "type": "resource", "resource": "Money", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "info"
+        }
+      ]
+    },
+    {
+      "id": "echo-chamber-brutal",
+      "title": "Algorithmic Trap",
+      "kind": "apocalyptic",
+      "cycleBehavior": "apocalyptic",
+      "ritualPath": "broadcast",
+      "tags": ["suspicion", "escalation", "apocalyptic"],
+      "body": "The platform's rules change against you.",
+      "choices": [
+        {
+          "id": "trap-invest",
+          "label": "Invest heavily in new ads",
+          "cost": { "Money": 2, "humanPower": 1 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -3 }],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "trap-extreme",
+          "label": "Lean into extremity to attract eyes",
+          "effects": [
+            { "type": "resource", "resource": "Cultists", "amount": 2 },
+            { "type": "resource", "resource": "Suspicion", "amount": 2 }
+          ],
+          "destination": "defer",
+          "tone": "danger"
+        },
+        {
+          "id": "trap-shutdown",
+          "label": "Shut down the channel",
+          "cost": { "Money": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Suspicion", "amount": -1 },
+            { "type": "pressure", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "info"
+        }
+      ]
+    },
+    {
+      "id": "screenless-day",
+      "title": "Screenless Day",
+      "kind": "common",
+      "cycleBehavior": "persistent",
+      "ritualPath": "broadcast",
+      "tags": ["cult", "ritual"],
+      "body": "A day without screens is declared by someone powerful.",
+      "choices": [
+        {
+          "id": "screenless-observe",
+          "label": "Observe quietly",
+          "effects": [{ "type": "pressure", "amount": 1 }],
+          "destination": "defer",
+          "tone": "info"
+        },
+        {
+          "id": "screenless-rally",
+          "label": "Use the break to rally offline",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Cultists", "amount": 1 },
+            { "type": "resource", "resource": "Suspicion", "amount": -1 }
+          ],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "screenless-sabotage",
+          "label": "Sabotage the event to keep eyes on you",
+          "cost": { "humanPower": 1 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": 2 }],
+          "destination": "discard",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "smoke-and-mirrors",
+      "title": "Smoke and Mirrors",
+      "kind": "common",
+      "cycleBehavior": "persistent",
+      "ritualPath": "broadcast",
+      "tags": ["money", "suspicion"],
+      "body": "Illusions and flashy tricks promise to distract the watchers.",
+      "choices": [
+        {
+          "id": "smoke-stage",
+          "label": "Stage the performance",
+          "cost": { "Money": 1 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -1 }],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "smoke-save",
+          "label": "Save resources for later",
+          "effects": [{ "type": "pressure", "amount": 1 }],
+          "destination": "defer",
+          "tone": "info"
+        },
+        {
+          "id": "smoke-expose",
+          "label": "Expose the tricks as lies",
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": 2 }],
+          "destination": "discard",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "broadcast-vision",
+      "title": "Screen Static",
+      "kind": "ritual",
+      "cycleBehavior": "persistent",
+      "ritualPath": "broadcast",
+      "setsRitualPath": "broadcast",
+      "startsRitualId": "signalPact",
+      "tags": ["ritual"],
+      "body": "Screens flicker with patterns that seem to know you.",
+      "choices": [
+        {
+          "id": "static-turn-away",
+          "label": "Turn away from the light",
+          "effects": [{ "type": "pressure", "amount": 1 }],
+          "destination": "defer",
+          "tone": "info"
+        },
+        {
+          "id": "static-transcribe",
+          "label": "Watch and transcribe",
+          "cost": { "Money": 1, "humanPower": 1 },
+          "effects": [
+            { "type": "startSelectedRitual" },
+            { "type": "stabilizeCycle", "amount": 1 }
+          ],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "static-step",
+          "label": "Step into the static",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "startSelectedRitual" },
+            { "type": "pressure", "amount": 2 }
+          ],
+          "destination": "remove",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "broadcast-work",
+      "title": "Signal Work",
+      "kind": "ritual",
+      "cycleBehavior": "persistent",
+      "requiresActiveRitual": true,
+      "ritualPath": "broadcast",
+      "tags": ["ritual", "cult"],
+      "body": "The pattern pulses with demands for funding and attention.",
+      "choices": [
+        {
+          "id": "signal-fund",
+          "label": "Fund the next sequence",
+          "usesRitualCost": true,
+          "effects": [{ "type": "advanceRitual" }],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "signal-adjust",
+          "label": "Adjust the broadcast schedule",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Money", "amount": 1 },
+            { "type": "pressure", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "info"
+        },
+        {
+          "id": "signal-algorithm",
+          "label": "Trust the algorithm",
+          "effects": [{ "type": "advanceRitualChance", "successChance": 0.5 }],
+          "destination": "discard",
+          "tone": "info"
+        }
+      ]
+    },
+    {
+      "id": "broadcast-work-brutal",
+      "title": "Feedback Loop",
+      "kind": "apocalyptic",
+      "cycleBehavior": "apocalyptic",
+      "requiresActiveRitual": true,
+      "ritualPath": "broadcast",
+      "tags": ["ritual", "escalation", "apocalyptic"],
+      "body": "The images repeat and distort, changing watchers.",
+      "choices": [
+        {
+          "id": "loop-recalibrate",
+          "label": "Recalibrate with heavy spending",
+          "cost": { "Money": 2, "humanPower": 1 },
+          "effects": [
+            { "type": "ritualStabilize" },
+            { "type": "stabilizeCycle", "amount": 2 }
+          ],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "loop-ride",
+          "label": "Ride the viral wave",
+          "cost": { "Money": 1 },
+          "effects": [
+            { "type": "advanceRitual", "unsafe": true },
+            { "type": "resource", "resource": "Suspicion", "amount": 2 }
+          ],
+          "destination": "defer",
+          "tone": "danger"
+        },
+        {
+          "id": "loop-power-down",
+          "label": "Cut the power entirely",
+          "effects": [
+            { "type": "ritualFailure" },
+            { "type": "pressure", "amount": 2 }
+          ],
+          "destination": "discard",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "crawling-fog",
+      "title": "Crawling Fog",
+      "kind": "common",
+      "cycleBehavior": "persistent",
+      "ritualPath": "outer",
+      "tags": ["suspicion", "relic"],
+      "body": "A pale fog licks at the streets and leaves behind spirals on skin.",
+      "choices": [
+        {
+          "id": "fog-wait",
+          "label": "Stay indoors and wait",
+          "effects": [{ "type": "pressure", "amount": 1 }],
+          "destination": "defer",
+          "tone": "info"
+        },
+        {
+          "id": "fog-sample",
+          "label": "Collect samples for study",
+          "cost": { "humanPower": 1 },
+          "effects": [{ "type": "resource", "resource": "Relics", "amount": 1 }],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "fog-walk",
+          "label": "Walk through it chanting",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Suspicion", "amount": 1 },
+            { "type": "resource", "resource": "Cultists", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "blood-moon",
+      "title": "Blood Moon",
+      "kind": "common",
+      "cycleBehavior": "discardable",
+      "ritualPath": "outer",
+      "tags": ["ritual", "escalation"],
+      "body": "The moon turns a deep red, causing tempers to fray and whispers to grow.",
+      "choices": [
+        {
+          "id": "moon-watch",
+          "label": "Hold a night watch and pray",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Suspicion", "amount": 1 },
+            { "type": "pressure", "amount": -1 }
+          ],
+          "destination": "discard",
+          "tone": "info"
+        },
+        {
+          "id": "moon-harvest",
+          "label": "Harvest the mood for a ceremony",
+          "cost": { "Money": 1 },
+          "effects": [{ "type": "resource", "resource": "Cultists", "amount": 1 }],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "moon-invoke",
+          "label": "Invoke old names under its light",
+          "cost": { "Relics": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Relics", "amount": 1 },
+            { "type": "resource", "resource": "Suspicion", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "relic-auction",
+      "title": "Relic Auction",
+      "kind": "opportunity",
+      "cycleBehavior": "unique",
+      "ritualPath": "outer",
+      "tags": ["relic", "money"],
+      "body": "A secret auction offers items older than memory.",
+      "choices": [
+        {
+          "id": "auction-observe",
+          "label": "Attend quietly as an observer",
+          "effects": [
+            { "type": "pressure", "amount": 1 },
+            { "type": "deferEvent", "eventId": "relic-auction" }
+          ],
+          "destination": "defer",
+          "tone": "info"
+        },
+        {
+          "id": "auction-bid",
+          "label": "Bid on the Eye's likeness",
+          "cost": { "Money": 3 },
+          "allowRelicSubstitution": true,
+          "effects": [
+            { "type": "resource", "resource": "Relics", "amount": 1 },
+            { "type": "opportunityUsed", "eventId": "relic-auction" }
+          ],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "auction-steal",
+          "label": "Steal it amidst the chaos",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Relics", "amount": 1 },
+            { "type": "resource", "resource": "Suspicion", "amount": 1 },
+            { "type": "opportunityUsed", "eventId": "relic-auction" }
+          ],
+          "destination": "remove",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "panic-parade",
+      "title": "Chaos Parade",
+      "kind": "common",
+      "cycleBehavior": "scalable",
+      "ritualPath": "outer",
+      "tags": ["suspicion", "cult", "escalation"],
+      "body": "A procession for some god you do not recognize goes past your door.",
+      "choices": [
+        {
+          "id": "parade-let",
+          "label": "Let them pass unnoticed",
+          "effects": [
+            { "type": "resource", "resource": "Suspicion", "amount": 2 },
+            { "type": "pressure", "amount": 1 }
+          ],
+          "destination": "upgrade",
+          "upgradeTo": "panic-parade-brutal",
+          "tone": "danger"
+        },
+        {
+          "id": "parade-join",
+          "label": "Join the parade in disguise",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Cultists", "amount": 1 },
+            { "type": "resource", "resource": "Suspicion", "amount": -1 }
+          ],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "parade-disrupt",
+          "label": "Disrupt it with a distraction",
+          "cost": { "Money": 1 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": 1 }],
+          "destination": "discard",
+          "tone": "info"
+        }
+      ]
+    },
+    {
+      "id": "panic-parade-brutal",
+      "title": "Endless Procession",
+      "kind": "apocalyptic",
+      "cycleBehavior": "apocalyptic",
+      "ritualPath": "outer",
+      "tags": ["suspicion", "escalation", "apocalyptic"],
+      "body": "The procession never ends and chants a name you cannot pronounce.",
+      "choices": [
+        {
+          "id": "procession-gift",
+          "label": "Offer gifts to be forgotten",
+          "cost": { "Money": 2, "Relics": 1 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -3 }],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "procession-join",
+          "label": "Step into the rhythm and recruit",
+          "effects": [
+            { "type": "resource", "resource": "Cultists", "amount": 2 },
+            { "type": "resource", "resource": "Suspicion", "amount": 2 }
+          ],
+          "destination": "defer",
+          "tone": "danger"
+        },
+        {
+          "id": "procession-hide",
+          "label": "Hide until it passes",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Suspicion", "amount": -1 },
+            { "type": "pressure", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "info"
+        }
+      ]
+    },
+    {
+      "id": "mutation",
+      "title": "Strange Growths",
+      "kind": "common",
+      "cycleBehavior": "persistent",
+      "ritualPath": "outer",
+      "tags": ["relic", "food"],
+      "body": "Food left in the corner develops eyes overnight.",
+      "choices": [
+        {
+          "id": "growth-dispose",
+          "label": "Dispose of it discreetly",
+          "cost": { "Food": 1 },
+          "effects": [{ "type": "resource", "resource": "Suspicion", "amount": -1 }],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "growth-study",
+          "label": "Study the growths carefully",
+          "cost": { "humanPower": 1 },
+          "effects": [{ "type": "resource", "resource": "Relics", "amount": 1 }],
+          "destination": "discard",
+          "tone": "info"
+        },
+        {
+          "id": "growth-feed",
+          "label": "Feed it to someone desperate",
+          "effects": [
+            { "type": "resource", "resource": "Food", "amount": 1 },
+            { "type": "resource", "resource": "Suspicion", "amount": 2 }
+          ],
+          "destination": "discard",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "plague-of-flies",
+      "title": "Plague of Flies",
+      "kind": "common",
+      "cycleBehavior": "discardable",
+      "ritualPath": "outer",
+      "tags": ["food", "escalation"],
+      "body": "Swarms of flies descend on your stores and on your followers.",
+      "choices": [
+        {
+          "id": "flies-cover",
+          "label": "Cover the supplies and wait",
+          "cost": { "Money": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Food", "amount": -1 },
+            { "type": "resource", "resource": "Suspicion", "amount": -1 }
+          ],
+          "destination": "discard",
+          "tone": "info"
+        },
+        {
+          "id": "flies-burn",
+          "label": "Burn the supplies to stop it",
+          "cost": { "Food": 2 },
+          "effects": [{ "type": "pressure", "amount": -1 }],
+          "destination": "discard",
+          "tone": "danger"
+        },
+        {
+          "id": "flies-send",
+          "label": "Send them into your rivals' larder",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Food", "amount": 1 },
+            { "type": "resource", "resource": "Suspicion", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "success"
+        }
+      ]
+    },
+    {
+      "id": "wild-offering",
+      "title": "Wild Offering",
+      "kind": "common",
+      "cycleBehavior": "persistent",
+      "ritualPath": "outer",
+      "tags": ["cult", "ritual"],
+      "body": "An animal wanders in, seemingly waiting for judgment.",
+      "choices": [
+        {
+          "id": "offering-let-go",
+          "label": "Let it go unharmed",
+          "effects": [{ "type": "pressure", "amount": 1 }],
+          "destination": "defer",
+          "tone": "info"
+        },
+        {
+          "id": "offering-sacrifice",
+          "label": "Sacrifice it according to tradition",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Cultists", "amount": 1 },
+            { "type": "resource", "resource": "Suspicion", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "danger"
+        },
+        {
+          "id": "offering-keep",
+          "label": "Keep it as a pet",
+          "cost": { "Food": 1 },
+          "effects": [{ "type": "resource", "resource": "Cultists", "amount": 1 }],
+          "destination": "discard",
+          "tone": "success"
+        }
+      ]
+    },
+    {
+      "id": "shifting-wager",
+      "title": "Shifting Wager",
+      "kind": "common",
+      "cycleBehavior": "persistent",
+      "ritualPath": "outer",
+      "tags": ["money", "cult"],
+      "body": "A cloaked stranger offers to teach you a game that rewrites itself.",
+      "choices": [
+        {
+          "id": "wager-refuse",
+          "label": "Refuse politely and leave",
+          "effects": [{ "type": "pressure", "amount": 1 }],
+          "destination": "defer",
+          "tone": "info"
+        },
+        {
+          "id": "wager-cautious",
+          "label": "Play cautiously",
+          "cost": { "Money": 1 },
+          "effects": [
+            { "type": "resource", "resource": "Money", "amount": 2 },
+            { "type": "resource", "resource": "Suspicion", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "wager-all-in",
+          "label": "Bet everything on one move",
+          "cost": { "Money": 2 },
+          "effects": [
+            { "type": "resource", "resource": "Money", "amount": 4 },
+            { "type": "pressure", "amount": 2 }
+          ],
+          "destination": "discard",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "outer-vision",
+      "title": "Watching Wall",
+      "kind": "ritual",
+      "cycleBehavior": "persistent",
+      "ritualPath": "outer",
+      "setsRitualPath": "outer",
+      "startsRitualId": "eyeRite",
+      "tags": ["ritual"],
+      "body": "Behind crumbling plaster, concentric circles stare back.",
+      "choices": [
+        {
+          "id": "wall-ignore",
+          "label": "Pretend not to notice",
+          "effects": [{ "type": "pressure", "amount": 1 }],
+          "destination": "defer",
+          "tone": "info"
+        },
+        {
+          "id": "wall-trace",
+          "label": "Trace the circles with chalk",
+          "cost": { "Money": 1, "humanPower": 1 },
+          "effects": [
+            { "type": "startSelectedRitual" },
+            { "type": "stabilizeCycle", "amount": 1 }
+          ],
+          "destination": "remove",
+          "tone": "success"
+        },
+        {
+          "id": "wall-peel",
+          "label": "Dig until the eye is free",
+          "cost": { "humanPower": 1 },
+          "effects": [
+            { "type": "startSelectedRitual" },
+            { "type": "pressure", "amount": 2 }
+          ],
+          "destination": "remove",
+          "tone": "danger"
+        }
+      ]
+    },
+    {
+      "id": "outer-work",
+      "title": "Gazing Work",
+      "kind": "ritual",
+      "cycleBehavior": "persistent",
+      "requiresActiveRitual": true,
+      "ritualPath": "outer",
+      "tags": ["ritual", "cult"],
+      "body": "The eye demands offerings and new patterns within patterns.",
+      "choices": [
+        {
+          "id": "gaze-give",
+          "label": "Give what the ritual demands",
+          "usesRitualCost": true,
+          "effects": [{ "type": "advanceRitual" }],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "gaze-offer-relic",
+          "label": "Offer additional relics to hasten the gaze",
+          "cost": { "Relics": 1 },
+          "effects": [
+            { "type": "advanceRitual" },
+            { "type": "resource", "resource": "Suspicion", "amount": 1 }
+          ],
+          "destination": "discard",
+          "tone": "info"
+        },
+        {
+          "id": "gaze-trust",
+          "label": "Entrust fate to the unseen",
+          "effects": [{ "type": "advanceRitualChance", "successChance": 0.5 }],
+          "destination": "discard",
+          "tone": "info"
+        }
+      ]
+    },
+    {
+      "id": "outer-work-brutal",
+      "title": "Shattered Circles",
+      "kind": "apocalyptic",
+      "cycleBehavior": "apocalyptic",
+      "requiresActiveRitual": true,
+      "ritualPath": "outer",
+      "tags": ["ritual", "escalation", "apocalyptic"],
+      "body": "The pattern fractures, releasing things with too many limbs.",
+      "choices": [
+        {
+          "id": "shattered-reconstruct",
+          "label": "Reconstruct with rare pigments",
+          "cost": { "Money": 2, "humanPower": 1 },
+          "effects": [
+            { "type": "ritualStabilize" },
+            { "type": "stabilizeCycle", "amount": 2 }
+          ],
+          "destination": "discard",
+          "tone": "success"
+        },
+        {
+          "id": "shattered-feed",
+          "label": "Feed the emerging thing",
+          "cost": { "Relics": 1 },
+          "effects": [
+            { "type": "advanceRitual", "unsafe": true },
+            { "type": "resource", "resource": "Suspicion", "amount": 2 }
+          ],
+          "destination": "defer",
+          "tone": "danger"
+        },
+        {
+          "id": "shattered-destroy",
+          "label": "Destroy the wall and flee",
           "effects": [
             { "type": "ritualFailure" },
             { "type": "pressure", "amount": 2 }

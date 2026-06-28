@@ -1,9 +1,11 @@
-import { enqueueMandatoryEvents } from "../rules/mandatoryRules.js";
+import { enqueueMandatoryEvents, dequeueNextMandatory } from "../rules/mandatoryRules.js";
 import { applyEscalation } from "../rules/escalationRules.js";
 import { shouldReshuffle } from "../rules/reshuffleRules.js";
 import { buildCycle } from "./cycleBuilder.js";
+import { evaluateGameStatus } from "./gameStatus.js";
 
 export function anticipateNextState(state, context) {
+  evaluateGameStatus(state);
   if (state.gameStatus !== "playing") return;
 
   if (state.ritual?.status === "active") {
@@ -11,10 +13,11 @@ export function anticipateNextState(state, context) {
   }
 
   applyEscalation(state, context.cycleConfig);
-  enqueueMandatoryEvents(state);
+  enqueueMandatoryEvents(state, context);
 
-  if (state.mandatoryQueue.length > 0) {
-    state.currentEvent = context.getEventById(state.mandatoryQueue.shift());
+  const nextMandatory = dequeueNextMandatory(state, context);
+  if (nextMandatory) {
+    state.currentEvent = context.getEventById(nextMandatory);
     state.log.push(`Evento obrigatorio: ${state.currentEvent.title}.`);
     return;
   }
@@ -27,9 +30,10 @@ export function anticipateNextState(state, context) {
 
   if (shouldReshuffle(state)) {
     buildCycle(state, context.events, context.cycleConfig);
-    enqueueMandatoryEvents(state);
-    if (state.mandatoryQueue.length > 0) {
-      state.currentEvent = context.getEventById(state.mandatoryQueue.shift());
+    enqueueMandatoryEvents(state, context);
+    const postReshuffleMandatory = dequeueNextMandatory(state, context);
+    if (postReshuffleMandatory) {
+      state.currentEvent = context.getEventById(postReshuffleMandatory);
       state.log.push(`Evento obrigatorio antes do ciclo: ${state.currentEvent.title}.`);
       return;
     }
@@ -37,7 +41,7 @@ export function anticipateNextState(state, context) {
 
   state.currentEvent = state.deck.shift() || null;
   if (!state.currentEvent) {
-    buildCycle(state, context.events, context.cycleConfig);
-    state.currentEvent = state.deck.shift() || null;
+    // No events passed all filters — controlled "no events" state, not a silent bug.
+    state.log.push("Nenhum evento disponivel para este ciclo.");
   }
 }

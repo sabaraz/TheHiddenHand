@@ -56,8 +56,8 @@ export function advanceRitual(state, rituals, unsafe = false, skipCost = false) 
       state.log.push(`Nova etapa ritual: ${nextStage.name}.`);
     } else {
       state.ritual.status = "complete";
-      state.gameStatus = "won";
-      state.log.push("O ritual final se fecha corretamente. Vitoria.");
+      // Win transition delegated to evaluateGameStatus in anticipateNextState.
+      state.log.push("O ritual final se fecha corretamente.");
     }
   }
 }
@@ -73,11 +73,13 @@ export function failRitual(state, rituals) {
     }
   }
 
-  state.log.push("O ritual falha e deixa uma marca.");
+  // Each failure delays one progress point within the current stage.
+  state.ritual.stageProgress = Math.max(0, state.ritual.stageProgress - 1);
+  state.log.push("O ritual falha e atrasa o progresso.");
+
   if (state.ritual.failures >= state.ritual.failureLimit) {
-    state.ritual.status = "failed";
-    state.gameStatus = "lost";
-    state.log.push("Falhas demais abrem a porta errada. Derrota.");
+    state.ritual.status = "cancelled";
+    state.log.push("As falhas acumuladas dissolvem o ritual. O caminho continua.");
   }
 }
 

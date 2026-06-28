@@ -12,14 +12,15 @@ let isEventOpen = false;
 let lastRenderedEventId = null;
 let dragScrollReady = false;
 
-export function render(state, context, handlers, selection = null) {
+export function render(state, context, handlers, selection = null, hint = null) {
   renderCycleStats(state);
   renderLog(state);
-  renderEvent(state, context, handlers, selection);
+  renderEvent(state, context, handlers, selection, hint);
   renderRitual(state, context);
   renderResourceHand(state, selection, handlers);
   renderPressureBar(state);
   renderSelectionBar(state, selection);
+  renderAlertState(state);
 }
 
 // ── Resource hand ─────────────────────────────────────────────────────────────
@@ -142,12 +143,21 @@ function renderCycleStats(state) {
 }
 
 function renderLog(state) {
+  const log = document.querySelector("#log");
   const entries = state.log.slice(-20).map((entry) => {
     const li = document.createElement("li");
     li.textContent = entry;
     return li;
   });
-  document.querySelector("#log").replaceChildren(...entries);
+  log.replaceChildren(...entries);
+  // Keep newest entry visible at the bottom
+  log.scrollTop = log.scrollHeight;
+}
+
+function renderAlertState(state) {
+  const btn = document.querySelector("#menu-btn");
+  if (!btn) return;
+  btn.classList.toggle("is-alert", state.gameStatus === "lost");
 }
 
 // ── Ritual ────────────────────────────────────────────────────────────────────
@@ -179,8 +189,8 @@ function renderRitual(state, context) {
     return;
   }
 
-  if (state.ritual.status === "failed") {
-    container.innerHTML = `<p class="danger">O ritual falhou al&#233;m de reparo.</p>`;
+  if (state.ritual.status === "cancelled") {
+    container.innerHTML = `<p class="danger">O ritual se dissolve. O caminho continua.</p>`;
     return;
   }
 
@@ -211,11 +221,13 @@ function renderPressureBar(state) {
 
 // ── Event card & choices ───────────────────────────────────────────────────────
 
-function renderEvent(state, context, handlers, selection) {
+function renderEvent(state, context, handlers, selection, hint) {
   const card = document.querySelector("#event-card");
   const tableCenter = document.querySelector(".table-center");
   const choicesSection = document.querySelector("#choices-section");
   const choiceList = document.querySelector("#choices");
+  // Suppress choiceRise animation when only a resource pick changed state.
+  choicesSection.classList.toggle("no-anim", hint === "pick");
   choiceList.replaceChildren();
 
   if (state.gameStatus !== "playing") {
@@ -272,7 +284,6 @@ function renderEvent(state, context, handlers, selection) {
       <div class="event-card-inner">
         <div class="event-kicker">
           <span class="event-type">${event.kind}</span>
-          <span class="event-closed-hint">toque para abrir</span>
         </div>
         <h3>${event.title}</h3>
         <p class="event-summary">${event.body}</p>
@@ -294,20 +305,25 @@ function renderEvent(state, context, handlers, selection) {
   } else {
     tableCenter.classList.add("is-event-open");
     card.className = "event-card event-card--open";
-    card.removeAttribute("role");
-    card.removeAttribute("tabindex");
-    card.onclick = null;
-    card.onkeydown = null;
+    card.setAttribute("role", "button");
+    card.setAttribute("tabindex", "0");
+    card.setAttribute("aria-label", `Fechar carta de evento: ${event.kind}`);
 
-    const tags = event.tags.map((t) => `<span class="tag">${t}</span>`).join("");
+    const closeEvent = () => {
+      isEventOpen = false;
+      handlers.onEventClose?.();
+    };
+    card.onclick = closeEvent;
+    card.onkeydown = (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        closeEvent();
+      }
+    };
+
     card.innerHTML = `
-      <div class="event-card-inner">
-        <div class="event-kicker">
-          <span class="event-type">${event.kind}</span>
-        </div>
-        <h3>${event.title}</h3>
-        <p class="event-summary">${event.body}</p>
-        <div class="tag-list">${tags}</div>
+      <div class="event-card-inner event-card-inner--zoom">
+        <span class="event-open-marker" aria-hidden="true"></span>
       </div>
     `;
     choicesSection.hidden = false;
@@ -359,12 +375,12 @@ function renderEvent(state, context, handlers, selection) {
       const costsEl = node.querySelector(".choice-card__costs");
 
       gainsEl.innerHTML = gains.length
-        ? gains.map((g) => `<span class="csq csq--${g.kind}">${g.text}</span>`).join("")
-        : `<span class="csq csq--empty">&#8212;</span>`;
+        ? gains.map(renderConsequence).join("")
+        : `<span class="csq csq--empty">∅</span>`;
 
       costsEl.innerHTML = costs.length
-        ? costs.map((c) => `<span class="csq csq--${c.kind}">${c.text}</span>`).join("")
-        : `<span class="csq csq--empty">&#8212;</span>`;
+        ? costs.map(renderConsequence).join("")
+        : `<span class="csq csq--empty">∅</span>`;
 
       node.addEventListener("click", () => {
         if (!canAfford || choiceState === "needs-resources" || choiceState === "blocked-by-picks") {
@@ -395,24 +411,37 @@ function buildConsequences(choice, cost) {
     if (amount <= 0) continue;
     const label = resource === "humanPower" ? "Cultists/Prisoners" : resource;
     const kind = resource === "Suspicion" ? "threat" : "cost";
-    costs.push({ text: `−${amount} ${label}`, kind });
+    costs.push({ text: `−${amount} ${label}`, kind, resource, amount, operator: "−" });
   }
 
   for (const effect of (choice.effects || [])) {
     switch (effect.type) {
       case "resource":
+        if (isMirroredCostEffect(effect, cost)) break;
         if (effect.amount > 0) {
           const kind = effect.resource === "Suspicion" ? "threat" : "gain";
-          gains.push({ text: `+${effect.amount} ${effect.resource}`, kind });
+          gains.push({
+            text: `+${effect.amount} ${effect.resource}`,
+            kind,
+            resource: effect.resource,
+            amount: effect.amount,
+            operator: "+"
+          });
         } else if (effect.amount < 0) {
-          costs.push({ text: `−${Math.abs(effect.amount)} ${effect.resource}`, kind: "cost" });
+          costs.push({
+            text: `−${Math.abs(effect.amount)} ${effect.resource}`,
+            kind: "cost",
+            resource: effect.resource,
+            amount: Math.abs(effect.amount),
+            operator: "−"
+          });
         }
         break;
       case "pressure":
         if (effect.amount > 0) {
-          costs.push({ text: `+${effect.amount} Pressure`, kind: "threat" });
+          costs.push({ text: "Press&#227;o", kind: "threat", pressure: true });
         } else if (effect.amount < 0) {
-          gains.push({ text: `−${Math.abs(effect.amount)} Pressure`, kind: "gain" });
+          gains.push({ text: "Press&#227;o", kind: "gain", pressure: true });
         }
         break;
       case "startRitual":
@@ -431,20 +460,55 @@ function buildConsequences(choice, cost) {
       case "ritualFailure":
         costs.push({ text: "Falha Ritual", kind: "threat" });
         break;
+      case "defeat":
+        costs.push({ text: "Derrota", kind: "threat" });
+        break;
       case "ritualStabilize":
         gains.push({ text: "Estabilizar Ritual", kind: "ritual" });
         break;
       case "stabilizeCycle":
-        gains.push({ text: `−${effect.amount} Pressure`, kind: "gain" });
+        gains.push({ text: "Press&#227;o", kind: "gain", pressure: true });
         break;
     }
   }
 
   if (choice.destination === "stabilize") {
-    gains.push({ text: "−1 Pressure", kind: "gain" });
+    gains.push({ text: "Press&#227;o", kind: "gain", pressure: true });
   }
 
   return { gains, costs };
+}
+
+function isMirroredCostEffect(effect, cost) {
+  return (
+    effect.mirrorsCost === true &&
+    effect.amount < 0 &&
+    (cost?.[effect.resource] ?? 0) >= Math.abs(effect.amount)
+  );
+}
+
+function renderConsequence(item) {
+  if (item.pressure) {
+    return `
+      <span class="csq csq--${item.kind} csq--pressure" title="${item.text}">
+        <span class="csq-pressure-mark" aria-hidden="true"></span>
+        <span>${item.text}</span>
+      </span>
+    `;
+  }
+
+  if (!item.resource) {
+    return `<span class="csq csq--${item.kind}">${item.text}</span>`;
+  }
+
+  const resourceClass = item.resource.toLowerCase();
+  const mark = item.resource === "humanPower" ? "H" : getResourceMark(item.resource);
+  return `
+    <span class="csq csq--${item.kind} csq--resource" title="${item.text}">
+      <span class="csq-op">${item.operator}${item.amount}</span>
+      <span class="csq-orb csq-orb--${resourceClass}" aria-label="${item.text}">${mark}</span>
+    </span>
+  `;
 }
 
 // ── Resource card labels ───────────────────────────────────────────────────────

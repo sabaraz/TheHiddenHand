@@ -18,6 +18,7 @@ export function createInitialState() {
     deferredMandatoryEvents: [],
     upgradedEvents: {},
     brutalizedEvents: 0,
+    runSeed: 0,
     cycle: 0,
     turn: 0,
     pressure: 0,

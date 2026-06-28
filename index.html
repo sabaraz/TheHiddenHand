@@ -5,8 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>The Hidden Hand</title>
     <link rel="stylesheet" href="styles/main.css">
+    <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.98/build/spline-viewer.js"></script>
   </head>
   <body>
+    <spline-viewer
+      class="bg-spline"
+      url="https://prod.spline.design/WB5jjIBWp504Byce/scene.splinecode"
+      loading-anim-type="none"
+    ></spline-viewer>
+
     <header class="app-header">
       <span class="app-header__title">The Hidden Hand</span>
       <button class="app-header__menu-btn" id="menu-btn" aria-label="Abrir menu" aria-expanded="false">
@@ -84,6 +91,12 @@
             <div id="resources" class="resource-hand"></div>
           </div>
         </section>
+      </div>
+
+      <!-- Cycle transition overlay — shown for ~6s on each new cycle -->
+      <div id="cycle-overlay" class="cycle-overlay" aria-hidden="true">
+        <span class="cycle-overlay__label">Ciclo <span id="cycle-overlay-num"></span></span>
+        <span class="cycle-overlay__name" id="cycle-overlay-name"></span>
       </div>
     </div>
 

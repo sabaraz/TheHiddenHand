@@ -10,6 +10,11 @@ let game;
 // { pickedIds: Set<string> } | null   (instance IDs like "Money:2", "Food:0")
 let selection = null;
 
+// Tracks the last cycle rendered so the transition animation fires exactly once
+// per new cycle, regardless of how many draw() calls happen within a cycle.
+// Starts at 0 so the first cycle (cycle = 1 on new game) does not trigger animation.
+let lastRenderedCycle = 0;
+
 init();
 
 async function init() {
@@ -128,13 +133,39 @@ function setMenuMessage(msg) {
   document.querySelector("#menu-message").textContent = msg;
 }
 
-function draw() {
+function showCycleTransition(cycle) {
+  const overlay = document.querySelector("#cycle-overlay");
+  if (!overlay) return;
+  document.querySelector("#cycle-overlay-num").textContent = cycle;
+  document.querySelector("#cycle-overlay-name").textContent =
+    context.cycleConfig?.activeProfile?.name ?? "";
+  overlay.setAttribute("aria-hidden", "false");
+  overlay.classList.remove("is-active");
+  overlay.offsetWidth; // force reflow to restart the animation
+  overlay.classList.add("is-active");
+  setTimeout(() => {
+    overlay.classList.remove("is-active");
+    overlay.setAttribute("aria-hidden", "true");
+  }, 6000);
+}
+
+function draw(hint = null) {
   const state = game.getState();
+
+  if (state.cycle > lastRenderedCycle && lastRenderedCycle > 0) {
+    showCycleTransition(state.cycle);
+  }
+  lastRenderedCycle = state.cycle;
 
   const handlers = {
     // Player opens an event card — make the hand interactive immediately.
     onEventOpen() {
       selection = { pickedIds: new Set() };
+      draw();
+    },
+
+    onEventClose() {
+      selection = null;
       draw();
     },
 
@@ -167,7 +198,7 @@ function draw() {
         next.add(cardId);
       }
       selection = { pickedIds: next };
-      draw();
+      draw("pick");
     },
 
     // Kept as safe fallback; not wired to any visible button.
@@ -191,5 +222,5 @@ function draw() {
     }
   };
 
-  render(state, context, handlers, selection);
+  render(state, context, handlers, selection, hint);
 }

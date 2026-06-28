@@ -1,11 +1,12 @@
 import { createInitialState, cloneState, clampResources } from "./initialState.js";
 import { anticipateNextState } from "./anticipationResolver.js";
-import { buildCycle } from "./cycleBuilder.js";
+import { buildCycle, mixSeed, seededIndex } from "./cycleBuilder.js";
 import { resolveEffects } from "./effectResolver.js";
 import { getRitualCost, canAdvanceRitual } from "./ritualEngine.js";
 import { getVisibleCost, hasResourcesForCost, payCost } from "../rules/costRules.js";
 import { canBrutalize } from "../rules/escalationRules.js";
 import { buildRequirement, isSelectionComplete } from "../rules/selectionModel.js";
+import { validateEventPools } from "../data/validateEventPools.js";
 
 export async function loadGameData() {
   const [eventPools, cycleConfig, rituals] = await Promise.all([
@@ -13,6 +14,11 @@ export async function loadGameData() {
     fetch("./data/cycleProfiles.json").then((response) => response.json()),
     fetch("./data/rituals.json").then((response) => response.json())
   ]);
+
+  const errors = validateEventPools(eventPools, rituals);
+  if (errors.length > 0) {
+    throw new Error(`eventPools validation failed:\n${errors.join("\n")}`);
+  }
 
   const events = [...eventPools.events];
   const mandatoryEvents = [...eventPools.mandatory];
@@ -29,14 +35,12 @@ export async function loadGameData() {
   };
 }
 
-export function createGame(context, savedState = null) {
+export function createGame(context, savedState = null, options = {}) {
+  const seedFactory = options.seedFactory || createRunSeed;
   const state = savedState ? normalizeLoadedState(savedState) : createInitialState();
 
   if (!savedState) {
-    const ritualIds = Object.keys(context.rituals);
-    state.selectedRitualId = ritualIds[Math.floor(Math.random() * ritualIds.length)];
-    buildCycle(state, context.events, context.cycleConfig);
-    anticipateNextState(state, context);
+    initializeRun(state, context, seedFactory());
   } else if (!state.currentEvent && state.gameStatus === "playing") {
     anticipateNextState(state, context);
   }
@@ -68,6 +72,8 @@ export function createGame(context, savedState = null) {
         return cloneState(state);
       }
 
+      let paidCost = {};
+
       if (option.usesRitualCost) {
         // Ritual advance path: cost is paid internally by advanceRitual via payCost.
         if (!canPayOption(state, option, context)) {
@@ -77,6 +83,7 @@ export function createGame(context, savedState = null) {
       } else {
         // Player-selection path: debit exactly what the player picked.
         const cost = getChoiceCost(state, option, context);
+        paidCost = cost;
         const requirement = buildRequirement(cost, Boolean(option.allowRelicSubstitution));
         if (requirement.length > 0) {
           if (!picks || !isSelectionComplete(requirement, picks, state.resources)) {
@@ -98,7 +105,7 @@ export function createGame(context, savedState = null) {
       state.lastEventId = event.id;
       state.currentEvent = null;
       state.log.push(`${event.title}: ${option.label}.`);
-      resolveEffects(state, option.effects, context);
+      resolveEffects(state, option.effects, context, { paidCost });
       resolveDestination(state, event, option, context);
       clampResources(state.resources);
       anticipateNextState(state, context);
@@ -110,10 +117,7 @@ export function createGame(context, savedState = null) {
       const fresh = createInitialState();
       for (const key of Object.keys(state)) delete state[key];
       Object.assign(state, fresh);
-      const ritualIds = Object.keys(context.rituals);
-      state.selectedRitualId = ritualIds[Math.floor(Math.random() * ritualIds.length)];
-      buildCycle(state, context.events, context.cycleConfig);
-      anticipateNextState(state, context);
+      initializeRun(state, context, seedFactory());
       return cloneState(state);
     },
 
@@ -121,6 +125,7 @@ export function createGame(context, savedState = null) {
       const resources = { ...state.resources };
       const ritual = state.ritual ? { ...state.ritual } : null;
       const selectedRitualId = state.selectedRitualId;
+      const runSeed = nextRunSeed(state);
       const cycle = state.cycle;
       const turn = state.turn;
 
@@ -141,6 +146,7 @@ export function createGame(context, savedState = null) {
       state.resources = resources;
       state.ritual = ritual;
       state.selectedRitualId = selectedRitualId;
+      state.runSeed = runSeed;
       state.cycle = cycle;
       state.turn = turn;
 
@@ -151,6 +157,30 @@ export function createGame(context, savedState = null) {
       return cloneState(state);
     }
   };
+}
+
+function createRunSeed() {
+  const cryptoApi = globalThis.crypto;
+  if (cryptoApi?.getRandomValues) {
+    return cryptoApi.getRandomValues(new Uint32Array(1))[0] >>> 0;
+  }
+  return Math.floor(Math.random() * 0x100000000) >>> 0;
+}
+
+function nextRunSeed(state) {
+  return mixSeed(state.runSeed, state.turn, state.cycle, state.log?.length || 0, 0x9E3779B9);
+}
+
+function initializeRun(state, context, runSeed) {
+  state.runSeed = runSeed >>> 0;
+  state.selectedRitualId = pickSeededRitualId(context.rituals, state.runSeed);
+  buildCycle(state, context.events, context.cycleConfig);
+  anticipateNextState(state, context);
+}
+
+function pickSeededRitualId(rituals, runSeed) {
+  const ritualIds = Object.keys(rituals);
+  return ritualIds[seededIndex(ritualIds.length, mixSeed(runSeed, 0xA11CE))] || null;
 }
 
 export function getChoiceCost(state, option, rituals) {
@@ -235,6 +265,7 @@ function normalizeLoadedState(state) {
   loaded.flags = state.flags || {};
   loaded.opportunitiesUsed = state.opportunitiesUsed || [];
   loaded.selectedRitualId = state.selectedRitualId || null;
+  loaded.runSeed = Number.isFinite(state.runSeed) ? state.runSeed >>> 0 : 0;
   loaded.log = state.log || [];
   return loaded;
 }
